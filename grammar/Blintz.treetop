@@ -1,8 +1,41 @@
-grammar Bplus
+grammar Blintz
+
+# ========Program Level Rules==========
+
+    rule blintz_module
+        (_s_ top_level_statement _s_)*
+    end
+
+# =======Top Level Statements==========
+
+    rule top_level_statement
+        function_def / import_statement
+    end
+
+    rule import_statement
+        _import _s_ string_literal _s_ ';'
+    end
+	
+	rule function_def
+		_def _s_ identifier _s_ parameter_list _s_ statement
+	end
+
+    rule struct_def
+        
+    end
+
+# ========Struct Statements============
+
+    
 
 # ===========Statements================
+
+    rule statement
+        compound_statement / simple_statement
+    end 
+
 	rule simple_statement
-		(expression_statement / if_statement / while_statement / return_statement) _s_ ';'
+		(expression_statement / assignment_statement / if_statement / while_statement / return_statement) _s_ ';'
 	end
 
 	rule compound_statement
@@ -17,10 +50,6 @@ grammar Bplus
 		_return _s_ expression?
 	end
 	
-	rule function_def
-		_def _s_ identifier _s_ parameter_list _s_ statement
-	end
-	
 	rule if_statement
 		_if _s_ '(' _s_ expression _s_ ')' _s_ statement _s_ (_s_ elsif_statement)* _s_ else_statement?
 	end
@@ -30,12 +59,16 @@ grammar Bplus
 	end
 	
 	rule elsif_statement
-		_elsif _s_ statement
+		_elsif _s_ '(' _s_ expression _s_ ')' _s_ statement
 	end
 	
 	rule while_statement
 		_while _s_ '(' _s_ expression _s_ ')' _s_ statement
 	end
+
+    rule assignment_statement
+        identifier _s_ '=' _s_ expression
+    end
 
 # ===========Expressions===============
 
@@ -60,10 +93,6 @@ grammar Bplus
 # 
 
 # ============Keywords=================
-
-	rule any_keyword
-		_if / _return / _while / _def / _struct
-	end
 
 	rule _struct
 		'struct' / 'STRUCT'
@@ -92,6 +121,10 @@ grammar Bplus
 	rule _return
 		'return' / 'RETURN'
 	end
+
+    rule _import
+        'import' / 'IMPORT'
+    end
 	
 # =========User Definitions============
 
