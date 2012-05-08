@@ -9,7 +9,7 @@ grammar Blintz
 # =======Top Level Statements==========
 
     rule top_level_statement
-        function_def / import_statement
+        function_def / import_statement / struct_def
     end
 
     rule import_statement
@@ -31,11 +31,7 @@ grammar Blintz
     end
 
     rule struct_body_statement
-        instance_var_declaration / function_def
-    end
-
-    rule instance_var_declaration
-        '@' identifier _s_ ';'
+        var_declaration_statement / function_def
     end
 
 # ===========Statements================
@@ -45,7 +41,7 @@ grammar Blintz
     end 
 
 	rule simple_statement
-		(expression_statement / assignment_statement / if_statement / while_statement / return_statement) _s_ ';'
+		(expression_statement / assignment_statement / var_declaration_statement / if_statement / while_statement / return_statement) _s_ ';'
 	end
 
 	rule compound_statement
@@ -59,6 +55,31 @@ grammar Blintz
 	rule return_statement
 		_return _s_ expression?
 	end
+
+    rule assignment_statement
+        identifier _s_ '=' _s_ expression
+    end
+
+
+# ===========Var Declarations===========
+
+    rule var_declaration_statement
+        word_var_declaration / struct_var_declaration
+    end
+
+    rule word_var_declaration
+        _var_decl _s_ identifier
+    end
+
+    rule struct_var_declaration
+        _var_decl _s_ struct_type _s_ identifier
+    end
+
+    rule _var_decl
+        _var _s_ var_decoration
+    end
+
+# ===========Conditionals==============
 	
 	rule if_statement
 		_if _s_ '(' _s_ expression _s_ ')' _s_ statement (_s_ elsif_statement)* _s_ else_statement?
@@ -71,14 +92,12 @@ grammar Blintz
 	rule elsif_statement
 		_elsif _s_ '(' _s_ expression _s_ ')' _s_ statement
 	end
-	
+
+# =============Loops===================
+
 	rule while_statement
 		_while _s_ '(' _s_ expression _s_ ')' _s_ statement
 	end
-
-    rule assignment_statement
-        identifier _s_ '=' _s_ expression
-    end
 
 # ===========Expressions===============
 
@@ -93,14 +112,12 @@ grammar Blintz
 	end
 	
 	rule parameter_list
-		identifier (additional_param)*
+		identifier _s_ (additional_param _s_)*
 	end
 	
 	rule additional_param
-		',' identifier
+		',' _s_ identifier
 	end
-
-# 
 
 # ============Keywords=================
 
@@ -136,18 +153,32 @@ grammar Blintz
         ('import' / 'IMPORT') !(keyword_term)
     end
 
+    rule _var
+        ('var' / 'VAR') !(keyword_term)
+    end
+
     rule keyword_term
         (![ \t\n] .)
     end
+
+# ========Var Decorations==============
+
+    rule var_decoration
+        _static / ''
+    end
+
+    rule _static
+        ('static' / 'STATIC') !(keyword_term)
+    end
 	
-# =========User Definitions============
+# =============Names===================
 
 	rule struct_type
 		[A-Z\._]+ [a-zA-Z\._0-9]*
 	end
 
 	rule identifier
-		[a-z\._]+ [a-zA-Z\._0-9]*
+		'@'? [a-z\._]+ [a-zA-Z\._0-9]*
 	end
 	
 # ============Literals=================
@@ -172,7 +203,7 @@ grammar Blintz
 		}
 	end
 	
-	# A literal is a number.
+	# A numeric literal term
 	rule numeric_literal
 		'-'? (hex / decimal) {
 			def content

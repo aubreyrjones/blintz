@@ -1,5 +1,10 @@
-def trivial_function() return 6;
+def trivial_function() 
+    return 6;
 
-struct TrivialStruct a_member;
+struct TrivialStruct {
+    var @a_member;
+}
 
-struct AnotherTrivialStruct def a_function(){return 6;}
+struct AnotherTrivialStruct {
+    def a_function(){return 6;}
+}

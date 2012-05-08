@@ -1,9 +1,19 @@
 def some_math(){
+  var s;
+  
   s = 2 * 4 + (3 + 6); // 21
   return s + s - 2; // 40
 }
 
+def using_a_struct(){
+  var Fraction fract;
+  fract.init(2, 4);
+
+  return fract.divide();
+}
+
 def loops(){
+  var a, b, c;
   a = true;
 
   //simple while loop.
@@ -17,7 +27,7 @@ def loops(){
   }
   
   //break
-  while(true){
+  while(c){
     break;
   }
   
@@ -33,19 +43,33 @@ def fib(n){
 }
 
 struct SimpleStruct {
-  @a;
-  @b;
+  var @a;
+  var @b;
+
+  def init(a, b){
+    @a = a;
+    @b = b;
+  }
 }
 
 // Class-like struct is supported, but no inheritance.
 struct Fraction {
-  @numerator;
-  @denominator;
-  SimpleStruct @structMember;
+  var SimpleStruct @structMember;
 
   def init(n, d){
-    @numerator = n;
-    @denominator = d;
+    @structMember.init(n, d);
+  }
+
+  def num(){
+    return @structMember.a;
+  }
+
+  def denom(){
+    return @structMember.b;
+  }
+
+  def divide(){
+    return @structMember.a / @structMember.b;
   }
 }
 
