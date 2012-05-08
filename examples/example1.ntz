@@ -32,16 +32,22 @@ def fib(n){
   return n + fib(n - 1);
 }
 
-// Class-like struct is supported, but no inheritance.
-//struct Fraction {
-  numerator;
-  denominator;
+struct SimpleStruct {
+  @a;
+  @b;
+}
 
-//  def init(n, d){
-//    numerator = n;
-//    denominator = d;
-//  }
-// }
+// Class-like struct is supported, but no inheritance.
+struct Fraction {
+  @numerator;
+  @denominator;
+  SimpleStruct @structMember;
+
+  def init(n, d){
+    @numerator = n;
+    @denominator = d;
+  }
+}
 
 // entry point
 def main(){

@@ -21,12 +21,22 @@ grammar Blintz
 	end
 
     rule struct_def
-        
+        _struct _s_ struct_type _s_ struct_body_definition
     end
 
 # ========Struct Statements============
 
-    
+    rule struct_body_definition
+        '{' (_s_ struct_body_statement _s_)+ '}'
+    end
+
+    rule struct_body_statement
+        instance_var_declaration / function_def
+    end
+
+    rule instance_var_declaration
+        '@' identifier _s_ ';'
+    end
 
 # ===========Statements================
 
@@ -51,7 +61,7 @@ grammar Blintz
 	end
 	
 	rule if_statement
-		_if _s_ '(' _s_ expression _s_ ')' _s_ statement _s_ (_s_ elsif_statement)* _s_ else_statement?
+		_if _s_ '(' _s_ expression _s_ ')' _s_ statement (_s_ elsif_statement)* _s_ else_statement?
 	end
 	
 	rule else_statement
@@ -95,40 +105,44 @@ grammar Blintz
 # ============Keywords=================
 
 	rule _struct
-		'struct' / 'STRUCT'
+		('struct' / 'STRUCT') !(keyword_term)
 	end
 
 	rule _while
-		'while' / 'WHILE'
+		('while' / 'WHILE') !(keyword_term)
 	end
 
 	rule _def
-		'def' / 'DEF'
+		('def' / 'DEF') !(keyword_term)
 	end
 
 	rule _if
-		'if' / 'IF'
+		('if' / 'IF') !(keyword_term)
 	end
 	
 	rule _elsif
-		'elsif' / 'ELSIF'
+		('elsif' / 'ELSIF') !(keyword_term)
 	end
 	
 	rule _else
-		'else' / 'ELSE'
+		('else' / 'ELSE') !(keyword_term)
 	end
 	
 	rule _return
-		'return' / 'RETURN'
+		('return' / 'RETURN') !(keyword_term)
 	end
 
     rule _import
-        'import' / 'IMPORT'
+        ('import' / 'IMPORT') !(keyword_term)
+    end
+
+    rule keyword_term
+        (![ \t\n] .)
     end
 	
 # =========User Definitions============
 
-	rule type
+	rule struct_type
 		[A-Z\._]+ [a-zA-Z\._0-9]*
 	end
 
@@ -138,8 +152,16 @@ grammar Blintz
 	
 # ============Literals=================
 	rule _s_
-		[ \t\n]*
+        (space / comment)*
 	end
+
+    rule space
+		([ \t\n]*)
+    end
+
+    rule comment
+        ('/*' (!'*/' .)* '*/') / ('//' (!"\n" .) "\n")
+    end
 
 	# A string literal
 	rule string_literal

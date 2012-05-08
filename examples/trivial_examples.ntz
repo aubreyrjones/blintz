@@ -1,1 +1,5 @@
 def trivial_function() return 6;
+
+struct TrivialStruct a_member;
+
+struct AnotherTrivialStruct def a_function(){return 6;}
