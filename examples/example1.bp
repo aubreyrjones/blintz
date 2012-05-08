@@ -1,0 +1,50 @@
+def some_math(){
+  s = 2 * 4 + (3 + 6); // 21
+  return s + s - 2; // 40
+}
+
+def loops(){
+  a = true;
+
+  //simple while loop.
+  while(a){
+    a = false;
+  }
+  
+  a = 6;
+  while(a < 12){
+    a = a + 1; 
+  }
+  
+  //break
+  while(true){
+    break;
+  }
+  
+  //also 'next', but I can't think of a trivial case
+}
+
+// Recursive function
+def fib(n){
+  if (n == 1 || n == 0){
+    return 1;
+  }
+  return n + fib(n - 1);
+}
+
+// Class-like struct is supported, but no inheritance.
+//struct Fraction {
+  numerator;
+  denominator;
+
+//  def init(n, d){
+//    numerator = n;
+//    denominator = d;
+//  }
+// }
+
+// entry point
+def main(){
+  loops();
+  fib(23);
+}

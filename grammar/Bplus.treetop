@@ -1,0 +1,151 @@
+grammar Bplus
+
+# ===========Statements================
+	rule simple_statement
+		(expression_statement / if_statement / while_statement / return_statement) _s_ ';'
+	end
+
+	rule compound_statement
+		'{' (_s_ simple_statement _s_)* '}'
+	end
+
+	rule expression_statement
+		expression
+	end
+
+	rule return_statement
+		_return _s_ expression?
+	end
+	
+	rule function_def
+		_def _s_ identifier _s_ parameter_list _s_ statement
+	end
+	
+	rule if_statement
+		_if _s_ '(' _s_ expression _s_ ')' _s_ statement _s_ (_s_ elsif_statement)* _s_ else_statement?
+	end
+	
+	rule else_statement
+		_else _s_ statement
+	end
+	
+	rule elsif_statement
+		_elsif _s_ statement
+	end
+	
+	rule while_statement
+		_while _s_ '(' _s_ expression _s_ ')' _s_ statement
+	end
+
+# ===========Expressions===============
+
+	rule expression
+		numeric_literal
+	end
+
+# ===========Functions=================
+	
+	rule parameter_list
+		'(' _s_ (parameter_list / '') _s_ ')' 
+	end
+	
+	rule parameter_list
+		identifier (additional_param)*
+	end
+	
+	rule additional_param
+		',' identifier
+	end
+
+# 
+
+# ============Keywords=================
+
+	rule any_keyword
+		_if / _return / _while / _def / _struct
+	end
+
+	rule _struct
+		'struct' / 'STRUCT'
+	end
+
+	rule _while
+		'while' / 'WHILE'
+	end
+
+	rule _def
+		'def' / 'DEF'
+	end
+
+	rule _if
+		'if' / 'IF'
+	end
+	
+	rule _elsif
+		'elsif' / 'ELSIF'
+	end
+	
+	rule _else
+		'else' / 'ELSE'
+	end
+	
+	rule _return
+		'return' / 'RETURN'
+	end
+	
+# =========User Definitions============
+
+	rule type
+		[A-Z\._]+ [a-zA-Z\._0-9]*
+	end
+
+	rule identifier
+		[a-z\._]+ [a-zA-Z\._0-9]*
+	end
+	
+# ============Literals=================
+	rule _s_
+		[ \t\n]*
+	end
+
+	# A string literal
+	rule string_literal
+		'"' ('\"' / !'"' .)* '"' {
+			def content
+				{:type => :string_literal, :token => text_value, :value => elements[1].text_value)}
+			end
+		}
+	end
+	
+	# A literal is a number.
+	rule numeric_literal
+		'-'? (hex / decimal) {
+			def content
+				sign = 1
+				if text_value.start_with? '-'
+					sign = -1
+				end
+				{:type => :numeric_literal, :token => text_value, :value => elements[1].value * sign}
+			end
+		}
+	end
+	
+	# A decimal number.
+	rule decimal
+		[0-9]+ {
+			def value
+				text_value.to_i(10)
+			end
+		}
+	end
+	
+	# A hexadecimal number
+	rule hex
+		'0x' [0-9a-fA-F]+ {
+			def value
+				text_value[2..-1].to_i(16)
+			end
+		}
+	end
+	
+end
