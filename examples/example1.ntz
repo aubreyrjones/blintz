@@ -5,10 +5,14 @@ def some_math(){
   return s + s - 2; // 40
 }
 
-def using_a_struct(){
+def passing_a_struct(){
   var Fraction fract;
   fract.init(2, 4);
 
+  return receiving_a_struct(fract);
+}
+
+def receiving_a_struct(fract as Fraction){
   return fract.divide();
 }
 
@@ -43,33 +47,37 @@ def fib(n){
 }
 
 struct SimpleStruct {
-  var @a;
-  var @b;
+  var a;
+  var b;
+}
 
-  def init(a, b){
-    @a = a;
-    @b = b;
+over SimpleStruct {
+  def init(a, b) {
+    @[:a] = a;
+    @[:b] = b;
   }
 }
 
 // Class-like struct is supported, but no inheritance.
 struct Fraction {
-  var SimpleStruct @structMember;
+  var SimpleStruct structMember;
+}
 
+over Fraction {
   def init(n, d){
-    @structMember.init(n, d);
+    @[:structMember].init(n, d);
   }
 
   def num(){
-    return @structMember.a;
+    return @[:structMember][:a];
   }
 
   def denom(){
-    return @structMember.b;
+    return @[:structMember][:b];
   }
 
   def divide(){
-    return @structMember.a / @structMember.b;
+    return @[:structMember][:a] / @[:structMember][:b];
   }
 }
 

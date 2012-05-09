@@ -1,0 +1,55 @@
+struct StackString {
+  var buffer;
+  var buf_len;
+  var length;
+}
+
+struct StackStringReference {
+  var string_p as StackString;
+}
+
+over StackString { 
+  def init(buf_ptr, buf_len){
+    buffer = buf_ptr;
+    buf_len = buf_len;
+  }
+  
+  def set(from_p, len){
+    var i;
+    
+    i = 0;
+    while (i < buf_len && i < len){
+      buffer[i] = from_p[i];
+      i = i + 1;
+    }
+    
+    length = len;
+  }
+  
+  def concat(other as String){
+    var i, j;
+    i = length;
+    j = 0;
+    while (i < buf_len && j < other[len]){
+      buffer[i] = other[j];
+      i = i + 1;
+      j = j + 1;
+    }
+  }
+}
+
+struct FixedSize {
+  var 4 arrow_key_state;
+}
+
+def main(){
+  var 1024 str_buf;
+  var StackString string;
+  var FixedSize fixed;
+  string.init(str_buf, 1024);
+  
+  if (fixed[arrow_key_state][0]){
+    
+  }
+}
+

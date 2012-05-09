@@ -3,7 +3,11 @@ grammar Blintz
 # ========Program Level Rules==========
 
     rule blintz_module
-        (_s_ top_level_statement _s_)*
+        blintz_module_statement*
+    end
+    
+    rule blintz_module_statement
+    	_s_ top_level_statement _s_
     end
 
 # =======Top Level Statements==========
