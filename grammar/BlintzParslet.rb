@@ -16,37 +16,37 @@ module BlintzGrammar
     rule(:literal) { (hex | decimal | string) >> space? }
     
     # Names
-    rule(:identifier) { (match['a-z_'] >> match['a-zA-Z0-9_'].repeat >> match['?'].maybe).repeat(1).as(:identifier) }
-    rule(:type_name) { (match['A-Z_'] >> match['a-zA-Z0-9_'].repeat >> match['?'].maybe).repeat(1).as(:type_name) }
-    rule(:name) {type_name | identifier}
+    rule(:identifier) { (match['a-z_'] >> match['a-zA-Z0-9_'].repeat >> match['?'].maybe) }
+    rule(:type_name) { (match['A-Z'] >> match['a-zA-Z0-9_'].repeat >> match['?'].maybe) }
+    rule(:name) {(type_name.as(:typename) | identifier.as(:identifier)) >> space?}
       
     # Operators
-    rule(:negate) { str('-') >> space? }
-    rule(:bit_not) { str('~') >> space? }
-    rule(:logical_not) { str('!') >> space? }
-    rule(:reference) { str('&') >> space? }
-    rule(:product) { match['*/'] >> space? }
-    rule(:sum) { match['+\\-'] >> space? }
-    rule(:logical_binary) { (str('&&') | str('||')) >> space? }
-    rule(:bit_binary) { (str('&') | str('|')) >> space? }
+    rule(:negate) { str('-').as(:unary_op) >> space? }
+    rule(:bit_not) { str('~').as(:unary_op) >> space? }
+    rule(:logical_not) { str('!').as(:unary_op) >> space? }
+    rule(:reference) { str('&').as(:unary_op) >> space? }
+    rule(:product) { match['*/'].as(:op) >> space? }
+    rule(:sum) { match['+\\-'].as(:op) >> space? }
+    rule(:logical_binary) { (str('&&') | str('||')).as(:op) >> space? }
+    rule(:bit_binary) { (str('&') | str('|')).as(:op) >> space? }
 
     # Expressions
     rule(:value) { name | literal }
-    rule(:unary_op) { (reference | negate | bit_not | logical_not).as(:operator) >> term.as(:value) }
-    rule(:product_op) { product.as(:operator) }
-    rule(:sum_op) { sum.as(:operator) }
-    rule(:logical_op) { logical_binary.as(:operator) }
-    rule(:bit_op) { bit_binary.as(:operator) }
+    rule(:unary_op) { (reference | negate | bit_not | logical_not) >> term }
+    rule(:product_op) { product }
+    rule(:sum_op) { sum }
+    rule(:logical_op) { logical_binary }
+    rule(:bit_op) { bit_binary }
 
     rule(:binary_op) { product_op | sum_op | logical_op | bit_op }
 
-    rule(:paren_expression) { str('(') >> space? >> expression.as(:sub_expr) >> space? >> str(')') }
+    rule(:paren_expression) { str('(') >> space? >> expression.as(:value) >> space? >> str(')') >> space? }
+    rule(:deref_expression) { str('[') >> space? >> expression.as(:deref_expr) >> space? >> str(']') >> space? }
 
     rule(:term) do 
-      value.as(:value) | paren_expression | unary_op | ( binary_op >> expression.as(:rhs) )
+      value.as(:value) | paren_expression | deref_expression | unary_op | ( binary_op >> expression.as(:rhs) )
     end
 
-#    rule(:binary_expansion) { binary_op.as(:operator) >> term.as(:arg) }
     rule(:expression)  { term >> term.maybe }
     
     root :expression
