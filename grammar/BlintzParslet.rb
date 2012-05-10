@@ -23,7 +23,7 @@ module BlintzGrammar
     # Operators
     rule(:negate) { str('-') >> space? }
     rule(:bit_not) { str('~') >> space? }
-    rule(:logical_not) { str('~') >> space? }
+    rule(:logical_not) { str('!') >> space? }
     rule(:reference) { str('&') >> space? }
     rule(:product) { match['*/'] >> space? }
     rule(:sum) { match['+\\-'] >> space? }
@@ -32,19 +32,22 @@ module BlintzGrammar
 
     # Expressions
     rule(:value) { name | literal }
-    rule(:unary_op) { (reference | negate | bit_not | logical_not).as(:operator) >> term.as(:rhs) }
-    rule(:product_op) { product.as(:operator) >> term.as(:rhs) }
-    rule(:sum_op) { sum.as(:operator) >> term.as(:rhs) }
-    rule(:logical_op) { logical_binary.as(:operator) >> term.as(:rhs) }
-    rule(:bit_op) { bit_binary.as(:operator) >> term.as(:rhs) }
+    rule(:unary_op) { (reference | negate | bit_not | logical_not).as(:operator) >> term.as(:value) }
+    rule(:product_op) { product.as(:operator) }
+    rule(:sum_op) { sum.as(:operator) }
+    rule(:logical_op) { logical_binary.as(:operator) }
+    rule(:bit_op) { bit_binary.as(:operator) }
+
+    rule(:binary_op) { product_op | sum_op | logical_op | bit_op }
+
+    rule(:paren_expression) { str('(') >> space? >> expression.as(:sub_expr) >> space? >> str(')') }
 
     rule(:term) do 
-     value.as(:value) | str('(') >> expression.as(:value) >> str(')') | unary_op.as(:value) | product_op.as(:value) | sum_op.as(:value) |
-        logical_op.as(:value) | bit_op.as(:value)
+      value.as(:value) | paren_expression | unary_op | ( binary_op >> expression.as(:rhs) )
     end
 
 #    rule(:binary_expansion) { binary_op.as(:operator) >> term.as(:arg) }
-    rule(:expression)  { term >> term.repeat(0).as(:rhs) }
+    rule(:expression)  { term >> term.maybe }
     
     root :expression
   end
