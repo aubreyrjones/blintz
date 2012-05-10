@@ -1,4 +1,4 @@
-grammar Blintz
+grammar BlintzGrammar
 
 # ========Program Level Rules==========
 
@@ -13,12 +13,12 @@ grammar Blintz
 # =======Top Level Statements==========
 
     rule top_level_statement
-        function_def / import_statement / struct_def
+        function_def # / import_statement / struct_def
     end
 
-    rule import_statement
-        _import _s_ string_literal _s_ ';'
-    end
+#    rule import_statement
+#        _include _s_ string_literal _s_ ';'
+#    end
 	
 	rule function_def
 		_def _s_ identifier _s_ parameter_list _s_ statement
@@ -133,8 +133,8 @@ grammar Blintz
 
 # ============Keywords=================
 
-    rule _import
-        ('import' / 'IMPORT') !(keyword_term)
+    rule _include
+        ('include' / 'INCLUDE') !(keyword_term)
     end
 
 	rule _def
@@ -197,7 +197,7 @@ grammar Blintz
 	
 # ============Literals=================
 	rule _s_
-        (space / comment)*
+        space
 	end
 
     rule space
