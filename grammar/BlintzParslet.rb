@@ -22,7 +22,6 @@ module BlintzGrammar
       
     # Operators
     rule(:negate) { str('-').as(:unary_op) >> space? }
-    rule(:bit_not) { str('~').as(:unary_op) >> space? }
     rule(:logical_not) { str('!').as(:unary_op) >> space? }
     rule(:reference) { str('#').as(:unary_op) >> space? }
     rule(:product) { match['*/'].as(:op) >> space? }
@@ -32,22 +31,27 @@ module BlintzGrammar
 
     # Expressions
     rule(:value) { name | literal }
-    rule(:unary_op) { (reference | negate | bit_not | logical_not) >> (value | paren_expression | deref_expression) }
+    rule(:unary_op) { (reference | negate | logical_not) }
     rule(:product_op) { product }
     rule(:sum_op) { sum }
     rule(:logical_op) { logical_binary }
     rule(:bit_op) { bit_binary }
-
     rule(:binary_op) { product_op | sum_op | logical_op | bit_op }
 
     rule(:paren_expression) { str('(') >> space? >> expression.as(:value) >> space? >> str(')') >> space? }
     rule(:deref_expression) { str('[').as(:unary_op) >> space? >> expression.as(:value) >> space? >> str(']') >> space? }
 
     rule(:term) do 
-      value.as(:value) | ( binary_op >> expression.as(:rhs) ) | unary_op.as(:rhs) | paren_expression | deref_expression
+      value.as(:value) | unary_op >> (value | paren_expression | deref_expression).as(:rhs) | paren_expression | deref_expression
     end
 
-    rule(:expression)  { term >> term.maybe }
+
+    rule(:product_expression) { term >> product_op >> expression.as(:rhs) }
+    rule(:sum_expression) { term >> sum_op >> product_expression.as(:rhs) }
+
+    rule(:binary_expression) { product_expression | sum_expression }
+
+    rule(:expression)  { term | binary_expression }
     
     root :expression
   end
