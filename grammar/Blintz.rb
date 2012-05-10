@@ -8,20 +8,6 @@ module Blintz
     @root ||= :blintz_module
   end
 
-  module BlintzModule0
-    def _s_1
-      elements[0]
-    end
-
-    def top_level_statement
-      elements[1]
-    end
-
-    def _s_2
-      elements[2]
-    end
-  end
-
   def _nt_blintz_module
     start_index = index
     if node_cache[:blintz_module].has_key?(index)
@@ -35,24 +21,7 @@ module Blintz
 
     s0, i0 = [], index
     loop do
-      i1, s1 = index, []
-      r2 = _nt__s_
-      s1 << r2
-      if r2
-        r3 = _nt_top_level_statement
-        s1 << r3
-        if r3
-          r4 = _nt__s_
-          s1 << r4
-        end
-      end
-      if s1.last
-        r1 = instantiate_node(SyntaxNode,input, i1...index, s1)
-        r1.extend(BlintzModule0)
-      else
-        @index = i1
-        r1 = nil
-      end
+      r1 = _nt_blintz_module_statement
       if r1
         s0 << r1
       else
@@ -62,6 +31,55 @@ module Blintz
     r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
 
     node_cache[:blintz_module][start_index] = r0
+
+    r0
+  end
+
+  module BlintzModuleStatement0
+    def _s_1
+      elements[0]
+    end
+
+    def top_level_statement
+      elements[1]
+    end
+
+    def _s_2
+      elements[2]
+    end
+  end
+
+  def _nt_blintz_module_statement
+    start_index = index
+    if node_cache[:blintz_module_statement].has_key?(index)
+      cached = node_cache[:blintz_module_statement][index]
+      if cached
+        cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
+        @index = cached.interval.end
+      end
+      return cached
+    end
+
+    i0, s0 = index, []
+    r1 = _nt__s_
+    s0 << r1
+    if r1
+      r2 = _nt_top_level_statement
+      s0 << r2
+      if r2
+        r3 = _nt__s_
+        s0 << r3
+      end
+    end
+    if s0.last
+      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
+      r0.extend(BlintzModuleStatement0)
+    else
+      @index = i0
+      r0 = nil
+    end
+
+    node_cache[:blintz_module_statement][start_index] = r0
 
     r0
   end
@@ -776,10 +794,28 @@ module Blintz
     r0
   end
 
-  def _nt_var_declaration_statement
+  def _nt_variable_declaration
     start_index = index
-    if node_cache[:var_declaration_statement].has_key?(index)
-      cached = node_cache[:var_declaration_statement][index]
+    if node_cache[:variable_declaration].has_key?(index)
+      cached = node_cache[:variable_declaration][index]
+      if cached
+        cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
+        @index = cached.interval.end
+      end
+      return cached
+    end
+
+    r0 = _nt_simple_decl
+
+    node_cache[:variable_declaration][start_index] = r0
+
+    r0
+  end
+
+  def _nt_simple_decl
+    start_index = index
+    if node_cache[:simple_decl].has_key?(index)
+      cached = node_cache[:simple_decl][index]
       if cached
         cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
         @index = cached.interval.end
@@ -788,75 +824,31 @@ module Blintz
     end
 
     i0 = index
-    r1 = _nt_word_var_declaration
+    r1 = _nt_struct_decl
     if r1
       r0 = r1
     else
-      r2 = _nt_struct_var_declaration
+      r2 = _nt_word_decl
       if r2
         r0 = r2
       else
-        @index = i0
-        r0 = nil
+        r3 = _nt_array_decl
+        if r3
+          r0 = r3
+        else
+          @index = i0
+          r0 = nil
+        end
       end
     end
 
-    node_cache[:var_declaration_statement][start_index] = r0
+    node_cache[:simple_decl][start_index] = r0
 
     r0
   end
 
-  module WordVarDeclaration0
-    def _var_decl
-      elements[0]
-    end
-
-    def _s_
-      elements[1]
-    end
-
-    def identifier
-      elements[2]
-    end
-  end
-
-  def _nt_word_var_declaration
-    start_index = index
-    if node_cache[:word_var_declaration].has_key?(index)
-      cached = node_cache[:word_var_declaration][index]
-      if cached
-        cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
-        @index = cached.interval.end
-      end
-      return cached
-    end
-
-    i0, s0 = index, []
-    r1 = _nt__var_decl
-    s0 << r1
-    if r1
-      r2 = _nt__s_
-      s0 << r2
-      if r2
-        r3 = _nt_identifier
-        s0 << r3
-      end
-    end
-    if s0.last
-      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
-      r0.extend(WordVarDeclaration0)
-    else
-      @index = i0
-      r0 = nil
-    end
-
-    node_cache[:word_var_declaration][start_index] = r0
-
-    r0
-  end
-
-  module StructVarDeclaration0
-    def _var_decl
+  module StructDecl0
+    def _var
       elements[0]
     end
 
@@ -864,80 +856,23 @@ module Blintz
       elements[1]
     end
 
-    def struct_type
+    def type_name
       elements[2]
     end
 
     def _s_2
-      elements[3]
+      elements[4]
     end
 
     def identifier
-      elements[4]
+      elements[5]
     end
   end
 
-  def _nt_struct_var_declaration
+  def _nt_struct_decl
     start_index = index
-    if node_cache[:struct_var_declaration].has_key?(index)
-      cached = node_cache[:struct_var_declaration][index]
-      if cached
-        cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
-        @index = cached.interval.end
-      end
-      return cached
-    end
-
-    i0, s0 = index, []
-    r1 = _nt__var_decl
-    s0 << r1
-    if r1
-      r2 = _nt__s_
-      s0 << r2
-      if r2
-        r3 = _nt_struct_type
-        s0 << r3
-        if r3
-          r4 = _nt__s_
-          s0 << r4
-          if r4
-            r5 = _nt_identifier
-            s0 << r5
-          end
-        end
-      end
-    end
-    if s0.last
-      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
-      r0.extend(StructVarDeclaration0)
-    else
-      @index = i0
-      r0 = nil
-    end
-
-    node_cache[:struct_var_declaration][start_index] = r0
-
-    r0
-  end
-
-  module _varDecl0
-    def _var
-      elements[0]
-    end
-
-    def _s_
-      elements[1]
-    end
-
-    def var_decoration
-      elements[2]
-    end
-  end
-
-  def _nt__var_decl
-    start_index = index
-    if node_cache[:_var_decl].has_key?(index)
-      cached = node_cache[:_var_decl][index]
+    if node_cache[:struct_decl].has_key?(index)
+      cached = node_cache[:struct_decl][index]
       if cached
         cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
         @index = cached.interval.end
@@ -952,19 +887,163 @@ module Blintz
       r2 = _nt__s_
       s0 << r2
       if r2
-        r3 = _nt_var_decoration
+        r3 = _nt_type_name
         s0 << r3
+        if r3
+          i4 = index
+          r5 = _nt_parameter_list
+          if r5
+            r4 = r5
+          else
+            if has_terminal?('', false, index)
+              r6 = instantiate_node(SyntaxNode,input, index...(index + 0))
+              @index += 0
+            else
+              terminal_parse_failure('')
+              r6 = nil
+            end
+            if r6
+              r4 = r6
+            else
+              @index = i4
+              r4 = nil
+            end
+          end
+          s0 << r4
+          if r4
+            r7 = _nt__s_
+            s0 << r7
+            if r7
+              r8 = _nt_identifier
+              s0 << r8
+            end
+          end
+        end
       end
     end
     if s0.last
       r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
-      r0.extend(_varDecl0)
+      r0.extend(StructDecl0)
     else
       @index = i0
       r0 = nil
     end
 
-    node_cache[:_var_decl][start_index] = r0
+    node_cache[:struct_decl][start_index] = r0
+
+    r0
+  end
+
+  module WordDecl0
+    def _var
+      elements[0]
+    end
+
+    def _s_
+      elements[1]
+    end
+
+    def identifier
+      elements[2]
+    end
+  end
+
+  def _nt_word_decl
+    start_index = index
+    if node_cache[:word_decl].has_key?(index)
+      cached = node_cache[:word_decl][index]
+      if cached
+        cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
+        @index = cached.interval.end
+      end
+      return cached
+    end
+
+    i0, s0 = index, []
+    r1 = _nt__var
+    s0 << r1
+    if r1
+      r2 = _nt__s_
+      s0 << r2
+      if r2
+        r3 = _nt_identifier
+        s0 << r3
+      end
+    end
+    if s0.last
+      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
+      r0.extend(WordDecl0)
+    else
+      @index = i0
+      r0 = nil
+    end
+
+    node_cache[:word_decl][start_index] = r0
+
+    r0
+  end
+
+  module ArrayDecl0
+    def _var
+      elements[0]
+    end
+
+    def _s_1
+      elements[1]
+    end
+
+    def expression
+      elements[2]
+    end
+
+    def _s_2
+      elements[3]
+    end
+
+    def identifier
+      elements[4]
+    end
+  end
+
+  def _nt_array_decl
+    start_index = index
+    if node_cache[:array_decl].has_key?(index)
+      cached = node_cache[:array_decl][index]
+      if cached
+        cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
+        @index = cached.interval.end
+      end
+      return cached
+    end
+
+    i0, s0 = index, []
+    r1 = _nt__var
+    s0 << r1
+    if r1
+      r2 = _nt__s_
+      s0 << r2
+      if r2
+        r3 = _nt_expression
+        s0 << r3
+        if r3
+          r4 = _nt__s_
+          s0 << r4
+          if r4
+            r5 = _nt_identifier
+            s0 << r5
+          end
+        end
+      end
+    end
+    if s0.last
+      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
+      r0.extend(ArrayDecl0)
+    else
+      @index = i0
+      r0 = nil
+    end
+
+    node_cache[:array_decl][start_index] = r0
 
     r0
   end
@@ -1302,6 +1381,7 @@ module Blintz
     def statement
       elements[8]
     end
+
   end
 
   def _nt_while_statement
@@ -1354,6 +1434,15 @@ module Blintz
                   if r8
                     r9 = _nt_statement
                     s0 << r9
+                    if r9
+                      r11 = _nt_next_statement
+                      if r11
+                        r10 = r11
+                      else
+                        r10 = instantiate_node(SyntaxNode,input, index...index)
+                      end
+                      s0 << r10
+                    end
                   end
                 end
               end
@@ -1371,6 +1460,55 @@ module Blintz
     end
 
     node_cache[:while_statement][start_index] = r0
+
+    r0
+  end
+
+  module NextStatement0
+    def _next
+      elements[0]
+    end
+
+    def _s_
+      elements[1]
+    end
+
+    def statement
+      elements[2]
+    end
+  end
+
+  def _nt_next_statement
+    start_index = index
+    if node_cache[:next_statement].has_key?(index)
+      cached = node_cache[:next_statement][index]
+      if cached
+        cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
+        @index = cached.interval.end
+      end
+      return cached
+    end
+
+    i0, s0 = index, []
+    r1 = _nt__next
+    s0 << r1
+    if r1
+      r2 = _nt__s_
+      s0 << r2
+      if r2
+        r3 = _nt_statement
+        s0 << r3
+      end
+    end
+    if s0.last
+      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
+      r0.extend(NextStatement0)
+    else
+      @index = i0
+      r0 = nil
+    end
+
+    node_cache[:next_statement][start_index] = r0
 
     r0
   end
@@ -1606,6 +1744,136 @@ module Blintz
     r0
   end
 
+  module _import0
+  end
+
+  def _nt__import
+    start_index = index
+    if node_cache[:_import].has_key?(index)
+      cached = node_cache[:_import][index]
+      if cached
+        cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
+        @index = cached.interval.end
+      end
+      return cached
+    end
+
+    i0, s0 = index, []
+    i1 = index
+    if has_terminal?('import', false, index)
+      r2 = instantiate_node(SyntaxNode,input, index...(index + 6))
+      @index += 6
+    else
+      terminal_parse_failure('import')
+      r2 = nil
+    end
+    if r2
+      r1 = r2
+    else
+      if has_terminal?('IMPORT', false, index)
+        r3 = instantiate_node(SyntaxNode,input, index...(index + 6))
+        @index += 6
+      else
+        terminal_parse_failure('IMPORT')
+        r3 = nil
+      end
+      if r3
+        r1 = r3
+      else
+        @index = i1
+        r1 = nil
+      end
+    end
+    s0 << r1
+    if r1
+      i4 = index
+      r5 = _nt_keyword_term
+      if r5
+        r4 = nil
+      else
+        @index = i4
+        r4 = instantiate_node(SyntaxNode,input, index...index)
+      end
+      s0 << r4
+    end
+    if s0.last
+      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
+      r0.extend(_import0)
+    else
+      @index = i0
+      r0 = nil
+    end
+
+    node_cache[:_import][start_index] = r0
+
+    r0
+  end
+
+  module _def0
+  end
+
+  def _nt__def
+    start_index = index
+    if node_cache[:_def].has_key?(index)
+      cached = node_cache[:_def][index]
+      if cached
+        cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
+        @index = cached.interval.end
+      end
+      return cached
+    end
+
+    i0, s0 = index, []
+    i1 = index
+    if has_terminal?('def', false, index)
+      r2 = instantiate_node(SyntaxNode,input, index...(index + 3))
+      @index += 3
+    else
+      terminal_parse_failure('def')
+      r2 = nil
+    end
+    if r2
+      r1 = r2
+    else
+      if has_terminal?('DEF', false, index)
+        r3 = instantiate_node(SyntaxNode,input, index...(index + 3))
+        @index += 3
+      else
+        terminal_parse_failure('DEF')
+        r3 = nil
+      end
+      if r3
+        r1 = r3
+      else
+        @index = i1
+        r1 = nil
+      end
+    end
+    s0 << r1
+    if r1
+      i4 = index
+      r5 = _nt_keyword_term
+      if r5
+        r4 = nil
+      else
+        @index = i4
+        r4 = instantiate_node(SyntaxNode,input, index...index)
+      end
+      s0 << r4
+    end
+    if s0.last
+      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
+      r0.extend(_def0)
+    else
+      @index = i0
+      r0 = nil
+    end
+
+    node_cache[:_def][start_index] = r0
+
+    r0
+  end
+
   module _struct0
   end
 
@@ -1667,6 +1935,136 @@ module Blintz
     end
 
     node_cache[:_struct][start_index] = r0
+
+    r0
+  end
+
+  module _filter0
+  end
+
+  def _nt__filter
+    start_index = index
+    if node_cache[:_filter].has_key?(index)
+      cached = node_cache[:_filter][index]
+      if cached
+        cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
+        @index = cached.interval.end
+      end
+      return cached
+    end
+
+    i0, s0 = index, []
+    i1 = index
+    if has_terminal?('filter', false, index)
+      r2 = instantiate_node(SyntaxNode,input, index...(index + 6))
+      @index += 6
+    else
+      terminal_parse_failure('filter')
+      r2 = nil
+    end
+    if r2
+      r1 = r2
+    else
+      if has_terminal?('FILTER', false, index)
+        r3 = instantiate_node(SyntaxNode,input, index...(index + 6))
+        @index += 6
+      else
+        terminal_parse_failure('FILTER')
+        r3 = nil
+      end
+      if r3
+        r1 = r3
+      else
+        @index = i1
+        r1 = nil
+      end
+    end
+    s0 << r1
+    if r1
+      i4 = index
+      r5 = _nt_keyword_term
+      if r5
+        r4 = nil
+      else
+        @index = i4
+        r4 = instantiate_node(SyntaxNode,input, index...index)
+      end
+      s0 << r4
+    end
+    if s0.last
+      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
+      r0.extend(_filter0)
+    else
+      @index = i0
+      r0 = nil
+    end
+
+    node_cache[:_filter][start_index] = r0
+
+    r0
+  end
+
+  module _as0
+  end
+
+  def _nt__as
+    start_index = index
+    if node_cache[:_as].has_key?(index)
+      cached = node_cache[:_as][index]
+      if cached
+        cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
+        @index = cached.interval.end
+      end
+      return cached
+    end
+
+    i0, s0 = index, []
+    i1 = index
+    if has_terminal?('as', false, index)
+      r2 = instantiate_node(SyntaxNode,input, index...(index + 2))
+      @index += 2
+    else
+      terminal_parse_failure('as')
+      r2 = nil
+    end
+    if r2
+      r1 = r2
+    else
+      if has_terminal?('AS', false, index)
+        r3 = instantiate_node(SyntaxNode,input, index...(index + 2))
+        @index += 2
+      else
+        terminal_parse_failure('AS')
+        r3 = nil
+      end
+      if r3
+        r1 = r3
+      else
+        @index = i1
+        r1 = nil
+      end
+    end
+    s0 << r1
+    if r1
+      i4 = index
+      r5 = _nt_keyword_term
+      if r5
+        r4 = nil
+      else
+        @index = i4
+        r4 = instantiate_node(SyntaxNode,input, index...index)
+      end
+      s0 << r4
+    end
+    if s0.last
+      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
+      r0.extend(_as0)
+    else
+      @index = i0
+      r0 = nil
+    end
+
+    node_cache[:_as][start_index] = r0
 
     r0
   end
@@ -1736,13 +2134,13 @@ module Blintz
     r0
   end
 
-  module _def0
+  module _next0
   end
 
-  def _nt__def
+  def _nt__next
     start_index = index
-    if node_cache[:_def].has_key?(index)
-      cached = node_cache[:_def][index]
+    if node_cache[:_next].has_key?(index)
+      cached = node_cache[:_next][index]
       if cached
         cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
         @index = cached.interval.end
@@ -1752,21 +2150,21 @@ module Blintz
 
     i0, s0 = index, []
     i1 = index
-    if has_terminal?('def', false, index)
-      r2 = instantiate_node(SyntaxNode,input, index...(index + 3))
-      @index += 3
+    if has_terminal?('next', false, index)
+      r2 = instantiate_node(SyntaxNode,input, index...(index + 4))
+      @index += 4
     else
-      terminal_parse_failure('def')
+      terminal_parse_failure('next')
       r2 = nil
     end
     if r2
       r1 = r2
     else
-      if has_terminal?('DEF', false, index)
-        r3 = instantiate_node(SyntaxNode,input, index...(index + 3))
-        @index += 3
+      if has_terminal?('NEXT', false, index)
+        r3 = instantiate_node(SyntaxNode,input, index...(index + 4))
+        @index += 4
       else
-        terminal_parse_failure('DEF')
+        terminal_parse_failure('NEXT')
         r3 = nil
       end
       if r3
@@ -1790,13 +2188,13 @@ module Blintz
     end
     if s0.last
       r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
-      r0.extend(_def0)
+      r0.extend(_next0)
     else
       @index = i0
       r0 = nil
     end
 
-    node_cache[:_def][start_index] = r0
+    node_cache[:_next][start_index] = r0
 
     r0
   end
@@ -2061,71 +2459,6 @@ module Blintz
     r0
   end
 
-  module _import0
-  end
-
-  def _nt__import
-    start_index = index
-    if node_cache[:_import].has_key?(index)
-      cached = node_cache[:_import][index]
-      if cached
-        cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
-        @index = cached.interval.end
-      end
-      return cached
-    end
-
-    i0, s0 = index, []
-    i1 = index
-    if has_terminal?('import', false, index)
-      r2 = instantiate_node(SyntaxNode,input, index...(index + 6))
-      @index += 6
-    else
-      terminal_parse_failure('import')
-      r2 = nil
-    end
-    if r2
-      r1 = r2
-    else
-      if has_terminal?('IMPORT', false, index)
-        r3 = instantiate_node(SyntaxNode,input, index...(index + 6))
-        @index += 6
-      else
-        terminal_parse_failure('IMPORT')
-        r3 = nil
-      end
-      if r3
-        r1 = r3
-      else
-        @index = i1
-        r1 = nil
-      end
-    end
-    s0 << r1
-    if r1
-      i4 = index
-      r5 = _nt_keyword_term
-      if r5
-        r4 = nil
-      else
-        @index = i4
-        r4 = instantiate_node(SyntaxNode,input, index...index)
-      end
-      s0 << r4
-    end
-    if s0.last
-      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
-      r0.extend(_import0)
-    else
-      @index = i0
-      r0 = nil
-    end
-
-    node_cache[:_import][start_index] = r0
-
-    r0
-  end
-
   module _var0
   end
 
@@ -2243,114 +2576,13 @@ module Blintz
     r0
   end
 
-  def _nt_var_decoration
+  module TypeName0
+  end
+
+  def _nt_type_name
     start_index = index
-    if node_cache[:var_decoration].has_key?(index)
-      cached = node_cache[:var_decoration][index]
-      if cached
-        cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
-        @index = cached.interval.end
-      end
-      return cached
-    end
-
-    i0 = index
-    r1 = _nt__static
-    if r1
-      r0 = r1
-    else
-      if has_terminal?('', false, index)
-        r2 = instantiate_node(SyntaxNode,input, index...(index + 0))
-        @index += 0
-      else
-        terminal_parse_failure('')
-        r2 = nil
-      end
-      if r2
-        r0 = r2
-      else
-        @index = i0
-        r0 = nil
-      end
-    end
-
-    node_cache[:var_decoration][start_index] = r0
-
-    r0
-  end
-
-  module _static0
-  end
-
-  def _nt__static
-    start_index = index
-    if node_cache[:_static].has_key?(index)
-      cached = node_cache[:_static][index]
-      if cached
-        cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
-        @index = cached.interval.end
-      end
-      return cached
-    end
-
-    i0, s0 = index, []
-    i1 = index
-    if has_terminal?('static', false, index)
-      r2 = instantiate_node(SyntaxNode,input, index...(index + 6))
-      @index += 6
-    else
-      terminal_parse_failure('static')
-      r2 = nil
-    end
-    if r2
-      r1 = r2
-    else
-      if has_terminal?('STATIC', false, index)
-        r3 = instantiate_node(SyntaxNode,input, index...(index + 6))
-        @index += 6
-      else
-        terminal_parse_failure('STATIC')
-        r3 = nil
-      end
-      if r3
-        r1 = r3
-      else
-        @index = i1
-        r1 = nil
-      end
-    end
-    s0 << r1
-    if r1
-      i4 = index
-      r5 = _nt_keyword_term
-      if r5
-        r4 = nil
-      else
-        @index = i4
-        r4 = instantiate_node(SyntaxNode,input, index...index)
-      end
-      s0 << r4
-    end
-    if s0.last
-      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
-      r0.extend(_static0)
-    else
-      @index = i0
-      r0 = nil
-    end
-
-    node_cache[:_static][start_index] = r0
-
-    r0
-  end
-
-  module StructType0
-  end
-
-  def _nt_struct_type
-    start_index = index
-    if node_cache[:struct_type].has_key?(index)
-      cached = node_cache[:struct_type][index]
+    if node_cache[:type_name].has_key?(index)
+      cached = node_cache[:type_name][index]
       if cached
         cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
         @index = cached.interval.end
@@ -2400,13 +2632,13 @@ module Blintz
     end
     if s0.last
       r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
-      r0.extend(StructType0)
+      r0.extend(TypeName0)
     else
       @index = i0
       r0 = nil
     end
 
-    node_cache[:struct_type][start_index] = r0
+    node_cache[:type_name][start_index] = r0
 
     r0
   end
@@ -2744,8 +2976,8 @@ module Blintz
   end
 
   module StringLiteral2
-			def content
-				{:type => :string_literal, :token => text_value, :value => elements[1].text_value)}
+			def value
+				elements[1].text_value[1..-2]
 			end
   end
 

@@ -1,0 +1,97 @@
+
+/**
+  Create a String with members:
+    @buffer
+    size
+    @lookahead_buffer
+    simple
+    
+    Buffer and size may be initialized by the allocator.
+*/
+
+struct String(@buffer, size){
+  var 4 @lookahead_buffer;
+  var simple;
+}
+
+/**
+  Methods defined on the String struct.
+*/
+filter String {
+  def init(){
+    //conventional runtime-initialization call.
+  }
+  
+  def initFromArray(@char_array, size){
+    var i;
+    
+    if (size > @[:size]){
+      return false;
+    }
+    
+    i = 0;
+    while (i < size){
+      @[:buffer][i] = @char_array[i];
+    } next {
+      i = i + 1;
+    }
+    
+    return true;
+  }
+}
+
+/**
+  Filters don't have to be tied to a struct
+*/
+filter StatelessDisplayDriver {
+  def init(hardwareId){
+    //initialize the hardware
+  }
+  
+  def dispose(){
+    // uninitialize the hardware 
+  }
+  
+  def writeTo(row, column, character){
+    @[(row * width) + column] = character;
+  }
+}
+
+
+def main(){
+  var a;              //one-word local variable
+  var 32 @array;      //32-word local array
+  var array_p;     //a raw reference
+  var String(@array, 32) @string ;        //allocates a String on the stack, constructed with the @array as its buffer
+                                          // set [pc + l_offset_string[:buffer]], sp
+                                          // add [pc + l_offset_string[:buffer]], l_offset_of_array
+  @string[:init("Hello there.")];
+  
+  a = @array; //raw array reference yields address.
+}
+
+
+def as_params(@string as String, @unfiltered_array, n){
+  @string[:init("Hello yourself")];
+  @string[:set(n, "pff")];
+
+  filter String(@unfiltered_array) @second_string;            //allocates nothing, but @second_string is now filtered as a String
+  
+  @second_string[:init("This ain't bad.")];                  //modifies the contents of @unfiltered_array as if it's a String
+}
+
+def manual_location(){
+  var String(0x8000, 398) @string; // creates an array in this stack frame, but buffered at the given location
+  
+  var 32 @manual_buffer at @string[:buffer] + MENU_LINE_OFFSET; // Create an array reference to a specific location
+  var String(@manual_buffer, 32) @substring; // A crude IO system, based on substrings
+  
+  @substring[:initFromArray("Testing?")];
+}
+
+
+
+
+
+
+

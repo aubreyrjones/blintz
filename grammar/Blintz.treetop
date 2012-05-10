@@ -67,21 +67,25 @@ grammar Blintz
 
 # ===========Var Declarations===========
 
-    rule var_declaration_statement
-        word_var_declaration / struct_var_declaration
-    end
+	rule variable_declaration
+		simple_decl
+	end
 
-    rule word_var_declaration
-        _var_decl _s_ identifier
-    end
+	rule simple_decl
+		struct_decl / word_decl / array_decl
+	end
 
-    rule struct_var_declaration
-        _var_decl _s_ struct_type _s_ identifier
-    end
+	rule struct_decl
+		_var _s_ type_name (parameter_list / '') _s_ identifier  
+	end
 
-    rule _var_decl
-        _var _s_ var_decoration
-    end
+	rule word_decl
+		_var _s_ identifier
+	end
+	
+	rule array_decl
+		_var _s_ expression _s_ identifier 
+	end
 
 # ===========Conditionals==============
 	
@@ -100,7 +104,11 @@ grammar Blintz
 # =============Loops===================
 
 	rule while_statement
-		_while _s_ '(' _s_ expression _s_ ')' _s_ statement
+		_while _s_ '(' _s_ expression _s_ ')' _s_ statement next_statement?
+	end
+	
+	rule next_statement
+		_next _s_ statement
 	end
 
 # ===========Expressions===============
@@ -125,16 +133,32 @@ grammar Blintz
 
 # ============Keywords=================
 
+    rule _import
+        ('import' / 'IMPORT') !(keyword_term)
+    end
+
+	rule _def
+		('def' / 'DEF') !(keyword_term)
+	end
+
 	rule _struct
 		('struct' / 'STRUCT') !(keyword_term)
+	end
+	
+	rule _filter
+		('filter' / 'FILTER') !(keyword_term)
+	end
+	
+	rule _as
+		('as' / 'AS') !(keyword_term)
 	end
 
 	rule _while
 		('while' / 'WHILE') !(keyword_term)
 	end
-
-	rule _def
-		('def' / 'DEF') !(keyword_term)
+	
+	rule _next
+		('next' / 'NEXT') !(keyword_term)
 	end
 
 	rule _if
@@ -153,10 +177,6 @@ grammar Blintz
 		('return' / 'RETURN') !(keyword_term)
 	end
 
-    rule _import
-        ('import' / 'IMPORT') !(keyword_term)
-    end
-
     rule _var
         ('var' / 'VAR') !(keyword_term)
     end
@@ -165,22 +185,12 @@ grammar Blintz
         (![ \t\n] .)
     end
 
-# ========Var Decorations==============
-
-    rule var_decoration
-        _static / ''
-    end
-
-    rule _static
-        ('static' / 'STATIC') !(keyword_term)
-    end
-	
 # =============Names===================
 
-	rule struct_type
+	rule type_name
 		[A-Z\._]+ [a-zA-Z\._0-9]*
 	end
-
+	
 	rule identifier
 		'@'? [a-z\._]+ [a-zA-Z\._0-9]*
 	end
@@ -201,8 +211,8 @@ grammar Blintz
 	# A string literal
 	rule string_literal
 		'"' ('\"' / !'"' .)* '"' {
-			def content
-				{:type => :string_literal, :token => text_value, :value => elements[1].text_value)}
+			def value
+				elements[1].text_value[1..-2]
 			end
 		}
 	end
