@@ -13,7 +13,6 @@ module BlintzGrammar
     rule(:string) do 
       str('"') >> (str('\\') >> any | str('"').absnt? >> any).repeat.as(:string_literal) >> str('"')
     end
-    
     rule(:literal) { (hex | decimal | string) >> space? }
     
     # Names
@@ -21,21 +20,10 @@ module BlintzGrammar
     rule(:type_name) { (match['A-Z_'] >> match['a-zA-Z0-9_'].repeat >> match['?'].maybe).repeat(1).as(:type_name) }
       
     # Expressions
-    rule(:simple_expression) do
-      sum 
-    end
-    
-    rule(:value) do
-      identifier | literal | (str('(') >> simple_expression >> str(')')).maybe
-    end
-    
-    rule(:product) do
-      value >> (match['*/'].as(:operator) >> value.as(:rhs)).maybe
-    end
-    
-    rule(:sum) do
-      product.as(:lhs) >> (match['\\-+'].as(:operator) >> product.as(:rhs)).maybe 
-    end
+    rule(:simple_expression)  { sum }
+    rule(:value) { identifier | literal | sum }
+    rule(:product) { value >> (match['*/'].as(:operator) >> value.as(:rhs)).maybe }
+    rule(:sum) { product.as(:lhs) >> (match['\\-+'].as(:operator) >> product.as(:rhs)).maybe }
     
     root :simple_expression
   end
