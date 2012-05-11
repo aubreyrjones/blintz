@@ -62,31 +62,47 @@ def main(){
   var a;              //one-word local variable
   var 32 @array;      //32-word local array
   var array_p;     //a raw reference
-  var String(@array, 32) @string ;        //allocates a String on the stack, constructed with the @array as its buffer
-                                          // set [pc + l_offset_string[:buffer]], sp
-                                          // add [pc + l_offset_string[:buffer]], l_offset_of_array
+
+  a = @array; //raw array reference yields address as a number
+  a = 6; //you overwrote your detyped pointer, oops
+  [a] = 6; //yeah, that'll work.
+  
+  var String(@array, 32) @string;        //allocates a String on the stack, c'tor filled in as requested
+  
   @string[:init("Hello there.")];
   
-  a = @array; //raw array reference yields address.
 }
+
+
+
 
 
 def as_params(@string as String, @unfiltered_array, n){
   @string[:init("Hello yourself")];
   @string[:set(n, "pff")];
 
-  filter String(@unfiltered_array) @second_string;            //allocates nothing, but @second_string is now filtered as a String
+  filter @second_string at @unfiltered_array as String;            //allocates nothing, but @unfiltered_array is now filtered as a String
   
   @second_string[:init("This ain't bad.")];                  //modifies the contents of @unfiltered_array as if it's a String
 }
 
+
+
+
+
 def manual_location(){
-  var String(0x8000, 398) @string; // creates an array in this stack frame, but buffered at the given location
+  var String(0x8000, 398) @string; // creates a struct in this stack frame, but with address as c'tor arg
   
-  var 32 @manual_buffer at @string[:buffer] + MENU_LINE_OFFSET; // Create an array reference to a specific location
-  var String(@manual_buffer, 32) @substring; // A crude IO system, based on substrings
+  filter @manual_buffer at @string[:buffer] + MENU_LINE_OFFSET; // Create an array reference to a specific location
+  
+  var String(@manual_buffer, 32) @substring; // A crude IO system, based on substrings?
   
   @substring[:initFromArray("Testing?")];
+  
+  filter @end_string at _end as String; // Filter an arbitrary memory address as an arbitrary Struct.
+                                        // Note that we're not talking about the @end_string[:buffer]
+                                        // reference. We're talking about the backing memory of the 
+                                        // struct specifically.
 }
 
 
