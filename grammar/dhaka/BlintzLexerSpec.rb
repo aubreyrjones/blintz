@@ -14,6 +14,12 @@ class BlintzLexerSpec < Dhaka::LexerSpecification
       create_token(operator)
     end
   end
-    
+  
+  keywords.each do |keyword|
+    for_pattern(keyword) do
+      create_token(keyword)
+    end
+  end
+  
   
 end

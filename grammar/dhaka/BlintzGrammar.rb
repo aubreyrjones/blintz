@@ -14,7 +14,7 @@ class BlintzGrammar < Dhaka::Grammar
     
   for_symbol('global_declaration') do
 #    import                %w| import string_literal statement_term |
-    function_def          %w| def identifier ( formal_params ) statement |
+    function_def          %w| def identifier statement |
     
   end
   
@@ -40,27 +40,30 @@ class BlintzGrammar < Dhaka::Grammar
     single_else        %w| else statement |
   end
   
-#	precedences do
-#		left 					%w| + - |
-#		left 					%w| * / |
-#		right 				%w| & - ! |
-#	end
+	precedences do
+    nonassoc %w| == |
+    nonassoc %w| < > |
+    left     %w| + - |
+    left     %w| * / |
+    nonassoc %w|  |
+    nonassoc %w| ! |
+	end
 
-#	for_symbol('Expr') do
-#    log_not       %w| ! Expr |
-#		mult					%w| Expr * Expr |
-#		div						%w| Expr / Expr |
-#		sub						%w| Expr - Expr |
-#		add						%w| Expr + Expr |
+	for_symbol('Expr') do
+    log_not       %w| ! Expr |
+		mult					%w| Expr * Expr |
+		div						%w| Expr / Expr |
+		sub						%w| Expr - Expr |
+		add						%w| Expr + Expr |
 #		log_and				%w| Expr && Expr |
 #		log_or				%w( Expr || Expr )
 #		bit_and				%w| Expr & Expr |
 #		bit_or				%w( Expr | Expr )
-#		literal				%w| NUMBER_LITERAL |
-#		name					%w| WORD_LITERAL |
-#		ref						%w| & WORD_LITERAL |
-#		paren					%w| ( Expr ) |
-#		deref					%w| [ Expr ] |
-#    negate        %w| - Expr |, :prec => '*'
-#	end
+		literal				%w| NUMBER_LITERAL |
+		name					%w| WORD_LITERAL |
+		ref						%w| & WORD_LITERAL |
+		paren					%w| ( Expr ) |
+		deref					%w| [ Expr ] |
+    negate        %w| - Expr |, :prec => '*'
+	end
 end
