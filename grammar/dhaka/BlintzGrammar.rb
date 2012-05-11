@@ -13,14 +13,14 @@ class BlintzGrammar < Dhaka::Grammar
   end
 
   for_symbol('global_declaration') do
-#    import                %w| import string_literal statement_term |
-    function_def          %w| def identifier statement |   
+#    import                %w| import string_literal ; |
+    function_def          %w| def function_name statement |
   end
   
   for_symbol('statement') do
     null_statement      %w| { } |
-    simple_statement    %w| primary_statement ; |
     compound_statement  %w| { statement_list } |
+    simple_statement    %w| primary_statement ; |
   end
   
   for_symbol('statement_list') do
@@ -29,13 +29,13 @@ class BlintzGrammar < Dhaka::Grammar
   end
   
   for_symbol('primary_statement') do
+    if_statement       %w| if ( expr ) statement |
     assign_statement   %w| expr = expr |
-#    if_statement       %w| if ( Expr ) statement elsif_list else |
     return_statement   %w| return expr |
   end
   
-  for_symbol('identifier') do
-    identifier_name             %w| WORD_LITERAL |
+  for_symbol('function_name') do
+    identifier_name             %w| NAME_LITERAL |
   end
   
 #  for_symbol('elsif_list') do
@@ -44,7 +44,7 @@ class BlintzGrammar < Dhaka::Grammar
 #    multiple_elsif     %w| elsif_list single_elsif |
 #  end
   
-#  for_symbol('else') do
+#  for_symbol('else_clause') do
 #    no_else            %w| |
 #    single_else        %w| else statement |
 #  end
@@ -68,7 +68,7 @@ class BlintzGrammar < Dhaka::Grammar
 #		bit_and				%w| Expr & Expr |
 #		bit_or				%w( Expr | Expr )
 		literal				%w| NUMBER_LITERAL |
-		name					%w| WORD_LITERAL |
+		name					%w| NAME_LITERAL |
 #		ref						%w| & WORD_LITERAL |
 		paren					%w| ( expr ) |
 #		deref					%w| [ Expr ] |
