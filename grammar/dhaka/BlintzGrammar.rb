@@ -40,10 +40,14 @@ class BlintzGrammar < Dhaka::Grammar
   
   for_symbol('elsif_list') do
     no_elsif           %w| |
-    single_elsif       %w| eslif statement |
-    multiple_elsif     %w| elsif_list single_elsif |
+    single_elsif       %w| elsif_clause |
+    multiple_elsif     %w| elsif_list elsif_list |
   end
   
+  for_symbol('elsif_clause') do
+    elsif_thingie       %w| elsif ( expr ) statement |
+  end
+
   for_symbol('else_clause') do
     no_else            %w| |
     single_else        %w| else statement |
