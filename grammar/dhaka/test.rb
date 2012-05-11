@@ -17,8 +17,11 @@ File.open('blintz_lexer.rb', 'w') {|file| file << lexer.compile_to_ruby_source_a
   
 require './blintz_lexer.rb'
 lex_result = BlintzLexer.lex("
-  def test { a = 3; return (5 + 23) + 2 / (3 - 6 + 2); } 
-  def testing return 3;")
+  def test { 
+    a = 3;
+    b = 6;
+    return (5 + 23) + 2 / (3 - 6 + 2); 
+  } ")
 
 parse_result = BlintzParser.parse(lex_result)
 if parse_result.is_a? Dhaka::TokenizerErrorResult
@@ -35,4 +38,5 @@ File.open('parse_tree.dot', 'w') do |file|
   file << parse_result.to_dot
 end
 
+system('dot -Tjpg blintz_parser.dot > parser_graph.jpg')
 system('dot -Tjpg parse_tree.dot > tree.jpg')

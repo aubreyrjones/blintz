@@ -18,12 +18,12 @@ class BlintzGrammar < Dhaka::Grammar
   end
   
   for_symbol('statement') do
+    null_statement      %w| { } |
     simple_statement    %w| primary_statement ; |
     compound_statement  %w| { statement_list } |
   end
   
   for_symbol('statement_list') do
-    no_statement        %w| |
     statement_item      %w| statement |
     multiple_items      %w| statement_list statement|
   end
