@@ -20,7 +20,7 @@ class BlintzGrammar < Dhaka::Grammar
   for_symbol('statement') do
     null_statement      %w| { } |
     compound_statement  %w| { statement_list } |
-    simple_statement    %w| primary_statement ; |
+    simple_statement    %w| primary_statement |
   end
   
   for_symbol('statement_list') do
@@ -29,25 +29,25 @@ class BlintzGrammar < Dhaka::Grammar
   end
   
   for_symbol('primary_statement') do
-    if_statement       %w| if ( expr ) statement |
-    assign_statement   %w| expr = expr |
-    return_statement   %w| return expr |
+    if_statement       %w| if ( expr ) statement elsif_list else_clause |
+    assign_statement   %w| expr = expr ; |
+    return_statement   %w| return expr ; |
   end
   
   for_symbol('function_name') do
     identifier_name             %w| NAME_LITERAL |
   end
   
-#  for_symbol('elsif_list') do
-#    no_elsif           %w| |
-#    single_elsif       %w| eslif statement |
-#    multiple_elsif     %w| elsif_list single_elsif |
-#  end
+  for_symbol('elsif_list') do
+    no_elsif           %w| |
+    single_elsif       %w| eslif statement |
+    multiple_elsif     %w| elsif_list single_elsif |
+  end
   
-#  for_symbol('else_clause') do
-#    no_else            %w| |
-#    single_else        %w| else statement |
-#  end
+  for_symbol('else_clause') do
+    no_else            %w| |
+    single_else        %w| else statement |
+  end
   
 	precedences do
 #    nonassoc %w| == |

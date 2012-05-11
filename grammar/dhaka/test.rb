@@ -20,7 +20,12 @@ File.open('blintz_lexer.rb', 'w') {|file| file << lexer.compile_to_ruby_source_a
 require './blintz_lexer.rb'
 lex_result = BlintzLexer.lex("
   def test { 
-    if (a) {a = 6 + 3; return 6;};
+    if (a) {a = 6 + 3; return 6;}
+    if (b) {
+        a = 6;
+    }
+    else 
+        c = 8;
     return 8;
   } ")
 
