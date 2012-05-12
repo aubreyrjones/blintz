@@ -23,27 +23,58 @@ class BlintzGrammar < Dhaka::Grammar
   end
   
   for_symbol('module_statements') do
-    no_declarations         %| |
-    single_declaration      %w| global_declaration |
-    multiple_declarations   %w| module_statements global_declaration |
+    no_declarations         %w| |
+    
+    declaration_list       %w| globals_list | do
+      retval = nil
+      if child_nodes[0].production.to_s =~ /global_declaration/
+        retval = child_nodes[0]
+      else
+        new_kids = []
+        recursive_statement_add(new_kids, child_nodes[0], /multiple_declaration globals_list/)
+        child_nodes.clear
+        child_nodes.concat(new_kids)
+      end
+      retval
+    end
+    
+  end
+
+  
+  for_symbol('globals_list') do
+    single_declaration      %w| global_declaration | 
+    multiple_declaration    %w| globals_list global_declaration | 
   end
 
   for_symbol('global_declaration') do
-#    import                %w| import string_literal ; |
-    function_def          %w| def function_name statement |
+    import                %w| import string_literal ; |       do child_nodes.shift ; self; end
+    global_function_def          %w| function_def |           do child_nodes[0] ; end
+  end
+  
+  for_symbol('function_def') do
+    f_def                 %w| def function_name statement |   do child_nodes.shift ; self ; end
   end
   
   for_symbol('statement') do
     null_statement      %w| { } |
+    
     simple_statement    %w| primary_statement |
+    
     compound_statement  %w| { statement_list } | do
-      new_kids = []
-      recursive_statement_add(new_kids, child_nodes[1], /multiple_items statement_list/)
-      child_nodes.clear
-      child_nodes.concat(new_kids)
+      if child_nodes[1].production.to_s =~ /simple_statement statement/
+        kid = child_nodes[1]
+        child_nodes.clear
+        child_nodes << kid
+      else
+        new_kids = []
+        recursive_statement_add(new_kids, child_nodes[1], /multiple_items statement_list/)
+        child_nodes.clear
+        child_nodes.concat(new_kids)      
+      end
       self
     end
   end
+
   
   for_symbol('statement_list') do
     statement_item      %w| statement | do
@@ -51,6 +82,7 @@ class BlintzGrammar < Dhaka::Grammar
     end
     multiple_items      %w| statement_list statement|
   end
+
   
   for_symbol('primary_statement') do
     if_statement       %w| if ( expr ) statement elsif_list else_clause | do
@@ -59,27 +91,39 @@ class BlintzGrammar < Dhaka::Grammar
       child_nodes.delete_at(0)
       self
     end
-    assign_statement   %w| expr = expr ; |
-    return_statement   %w| return expr ; |
+    
+    assign_statement   %w| expr = expr ; |          do child_nodes.delete_at 1; child_nodes.delete_at -1; self; end
+    return_statement   %w| return expr ; |          do child_nodes.delete_at 0; child_nodes.delete_at -1; self; end
+    var_decl           %w| var var_declaration ; |      do child_nodes[1]; end
   end
+
   
   for_symbol('function_name') do
     identifier_name             %w| NAME_LITERAL |
   end
+
   
   for_symbol('elsif_list') do
+    single_elsif       %w| elsif_clause |            do child_nodes[0]; end
+    multiple_elsif     %w| elsif_list elsif_clause | do recursive_statement_add(k = [], self, /multiple_elsif elsif_list/); child_nodes.clear.concat(k); self; end
     no_elsif           %w| |
-    single_elsif       %w| elsif_clause |
-    multiple_elsif     %w| elsif_list elsif_list |
   end
+
   
   for_symbol('elsif_clause') do
-    elsif_thingie       %w| elsif ( expr ) statement |
+    elsif_expr_statement     %w| elsif ( expr ) statement | do child_nodes.shift 2 ; child_nodes.delete_at 1 ; self; end
   end
+
 
   for_symbol('else_clause') do
     no_else            %w| |
-    else_present       %w| else statement |
+    else_present       %w| else statement |          do child_nodes.shift ; self; end
+  end
+  
+  
+  for_symbol('var_declaration') do
+    simple_spec        %w| NAME_LITERAL |
+    array_spec         %w| expr @ NAME_LITERAL |      do child_nodes.delete_at 1 ; self ; end
   end
   
 	precedences do

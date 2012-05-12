@@ -21,15 +21,15 @@ File.open('blintz_lexer.rb', 'w') {|file| file << lexer.compile_to_ruby_source_a
 require './blintz_lexer.rb'
 lex_result = BlintzLexer.lex("
   def test {
-    if (b) {
-        b = 6;
-    }
-    elsif (t) t = 3;
-    elsif (u) u = 23;
-    elsif (v) v = 17;
-    else t = 6;
-    return 7;
-  } ")
+    var test_var;
+    var 12 @test_array;
+  }
+  
+  def test2 {
+    var test_var;
+  }
+  
+  ")
 
 parse_result = BlintzParser.parse(lex_result)
 if parse_result.is_a? Dhaka::TokenizerErrorResult
