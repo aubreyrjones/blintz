@@ -23,6 +23,15 @@ lex_result = BlintzLexer.lex("
   def test {
     var test_var;
     var 12 @test_array;
+    
+    if (test_var) {
+      test_var = 2*2/3+2;
+    }
+    elsif (test_var2) return 3;
+    else {
+      x = y;
+    }
+    @test_array = test_var;
   }
   
   def test2 {
