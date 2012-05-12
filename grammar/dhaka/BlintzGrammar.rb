@@ -1,5 +1,21 @@
 require 'dhaka'
 
+def recursive_statement_add(list, mil_node, production_name)
+  prod_name = mil_node.production.to_s
+  
+  if prod_name =~ production_name
+    if mil_node.child_nodes[0].production.to_s =~ production_name
+      recursive_statement_add(list, mil_node.child_nodes[0], production_name)
+    else
+      list << mil_node.child_nodes[0]
+    end
+    
+    if mil_node.child_nodes.size > 1
+      list << mil_node.child_nodes[1]
+    end
+  end
+end
+
 class BlintzGrammar < Dhaka::Grammar
 
   for_symbol(Dhaka::START_SYMBOL_NAME) do
@@ -19,17 +35,30 @@ class BlintzGrammar < Dhaka::Grammar
   
   for_symbol('statement') do
     null_statement      %w| { } |
-    compound_statement  %w| { statement_list } |
     simple_statement    %w| primary_statement |
+    compound_statement  %w| { statement_list } | do
+      new_kids = []
+      recursive_statement_add(new_kids, child_nodes[1], /multiple_items statement_list/)
+      child_nodes.clear
+      child_nodes.concat(new_kids)
+      self
+    end
   end
   
   for_symbol('statement_list') do
-    statement_item      %w| statement |
+    statement_item      %w| statement | do
+      child_nodes[0]
+    end
     multiple_items      %w| statement_list statement|
   end
   
   for_symbol('primary_statement') do
-    if_statement       %w| if ( expr ) statement elsif_list else_clause |
+    if_statement       %w| if ( expr ) statement elsif_list else_clause | do
+      child_nodes.delete_at(1)
+      child_nodes.delete_at(2)
+      child_nodes.delete_at(0)
+      self
+    end
     assign_statement   %w| expr = expr ; |
     return_statement   %w| return expr ; |
   end
@@ -50,7 +79,7 @@ class BlintzGrammar < Dhaka::Grammar
 
   for_symbol('else_clause') do
     no_else            %w| |
-    single_else        %w| else statement |
+    else_present       %w| else statement |
   end
   
 	precedences do

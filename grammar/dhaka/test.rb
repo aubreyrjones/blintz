@@ -20,18 +20,15 @@ File.open('blintz_lexer.rb', 'w') {|file| file << lexer.compile_to_ruby_source_a
   
 require './blintz_lexer.rb'
 lex_result = BlintzLexer.lex("
-  def test { 
+  def test {
     if (b) {
-        a = 6;
+        b = 6;
     }
-    elsif (a) {
-        b = 128;
-    }
-    elsif (c) 
-        c = 256;
-    else 
-        c = 8;
-    return 8;
+    elsif (t) t = 3;
+    elsif (u) u = 23;
+    elsif (v) v = 17;
+    else t = 6;
+    return 7;
   } ")
 
 parse_result = BlintzParser.parse(lex_result)
