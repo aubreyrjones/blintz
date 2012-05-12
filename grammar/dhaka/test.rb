@@ -20,7 +20,10 @@ File.open('blintz_lexer.rb', 'w') {|file| file << lexer.compile_to_ruby_source_a
 require './blintz_lexer.rb'
 
 BIG_TEST = "
+  import \"testing\";
   def test {
+    var a;
+    var 12 @arr;
     if (a) return 6;
     
     if (test_var) {
@@ -33,7 +36,7 @@ BIG_TEST = "
   
   def test2 {
     if (test_var) {
-      test_var = 2*2/3+2;
+      test_var = 2+2/3+2;
     }
     elsif (test_var2) return 3;
     elsif (test_var2) return 3;

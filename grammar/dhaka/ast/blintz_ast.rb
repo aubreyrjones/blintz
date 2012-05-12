@@ -68,11 +68,12 @@ module BlintzAst
     end
     
     def tagged?(tag_name)
-      return tag_name == tag
+      return true if tag == tag_name
+      tags.include?(tag_name)
     end
     
     def tags
-      @bt
+      @bt || []
     end
     
     def tag_str
@@ -100,7 +101,7 @@ module BlintzAst
       else
         s = obj.to_s
         graph.edge(self, s, :label => edge_label, :color => 'gray')
-        graph.node(s, :label => s)
+        graph.node(s, :label => s, :color => 'blue')
       end
     end
     
@@ -160,7 +161,7 @@ module BlintzAst
     end
     
     def self_type_node(attr={})
-      return Node.new(tags, attr)
+      return Node.new(@bt, attr)
     end
     
     def empty_nil(list)
@@ -168,6 +169,31 @@ module BlintzAst
         return []
       end
       return list
+    end
+    
+    def recursive_list(list, prod_regex)
+      if child_nodes.nil?
+        list << self
+      end
+      
+      prod_name = production.to_s
+      
+      if prod_name =~ prod_regex
+        child_nodes[0].recursive_list(list, prod_regex)
+        if child_nodes.size > 1
+          child_nodes[1].recursive_list(list, prod_regex)
+        end
+      else
+        list << self
+      end
+    end
+    
+    def rec_list_compact(root_node, prod_regex)
+      new_kids = []
+      root_node.recursive_list(new_kids, prod_regex)
+      child_nodes.clear
+      child_nodes.concat(new_kids)
+      self
     end
     
     def blintz_collect
@@ -220,6 +246,13 @@ module BlintzAst
         elsif child_nodes.size == 3
           return self_type_node(:lhs => skip_get(0).blintz_collect,
                                 :rhs => skip_get(2).blintz_collect)
+        end
+      when :var
+        if tagged? :simple
+          return self_type_node(:name => skip_get(0).blintz_collect)
+        elsif tagged? :array
+          return self_type_node(:size => skip_get(0).blintz_collect,
+                                :name => skip_get(2).blintz_collect)
         end
       else
         return self

@@ -54,7 +54,7 @@ class BlintzGrammar < Dhaka::Grammar
   end
 
   for_symbol('global_declaration') do
-    import                %w| import string_literal ; |           do tag!(:import); end
+    import                %w| import STRING_LITERAL ; |           do tag!(:import); end
     global_function_def   %w| function_def |                      do child_nodes[0]; end
   end
   

@@ -15,6 +15,10 @@ class BlintzLexerSpec < Dhaka::LexerSpecification
       create_token(keyword)
     end
   end
+  
+  for_pattern('"([^"\\\\]*(\\\\.[^"\\\\]*)*)"') do
+    create_token 'STRING_LITERAL'
+  end
     
   for_pattern("[a-z_]+(#{id_remainder})?") do
     create_token 'NAME_LITERAL'
