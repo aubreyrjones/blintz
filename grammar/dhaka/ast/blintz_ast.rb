@@ -94,11 +94,13 @@ module BlintzAst
     end
     
     def rec_graph(graph, obj, edge_label)
-      graph.edge(self, obj, :label => edge_label)
       if obj.respond_to? :to_dot
+        graph.edge(self, obj, :label => edge_label, :color => 'black')
         obj.to_dot(graph)
       else
-        graph.node(obj, :label => obj.to_s)
+        s = obj.to_s
+        graph.edge(self, s, :label => edge_label, :color => 'gray')
+        graph.node(s, :label => s)
       end
     end
     
@@ -121,7 +123,14 @@ module BlintzAst
     def blintz_collect
       case self.token.symbol_name
       when 'NAME_LITERAL'
-        return Node.new([:literal, :name], :value => self.token.value)
+        return self.token.value
+        # return Node.new([:literal, :name], :value => self.token.value)
+      when 'DECIMAL_LITERAL'
+        # return Node.new([:literal, :numeric], :value => self.token.value.to_i)
+        return self.token.value.to_i
+      when 'HEX_LITERAL'
+        # return Node.new([:literal, :numeric], :value => self.token.value[2..-1].to_i(16))
+        return self.token.value[2..-1].to_i(16)
       end
       
       return Node.new(:leaf, :token => self.to_s)
@@ -172,27 +181,49 @@ module BlintzAst
       when :module
         return self_type_node(:declarations => skip_get(0).blintz_collect)
       when :declarations
+        return skip_get(0).blintz_collect
+      when :declaration_list
         return child_nodes.map {|n| skip_get(n).blintz_collect }
       when :def
         return self_type_node(:name => skip_get(1).blintz_collect,
                               :statement => skip_get(2).blintz_collect)
       when :compound_statement
-        return self_type_node(:subs => child_nodes.map {|n| n.blintz_collect})
+        return self_type_node(:subs => child_nodes.map {|n| skip_get(n).blintz_collect})
       when :assign
-        return self_type_node(:lhs => skip_get(0).blintz_collect,
-                              :rhs => skip_get(2).blintz_collect)
+        return self_type_node(:dest => skip_get(0).blintz_collect,
+                              :source => skip_get(2).blintz_collect)
       when :if
+        a = {
+            :condition => skip_get(2).blintz_collect,
+            :statement => skip_get(4).blintz_collect,
+            :else      => skip_get(6) ? skip_get(6).blintz_collect : nil,
+            :elsif     => skip_get(5) ? skip_get(5).blintz_collect : nil
+            }
+          
+        return self_type_node(a)
+      when :elsif
         return self_type_node(:condition => skip_get(2).blintz_collect,
-                              :statement => skip_get(4).blintz_collect,
-                              :elsif     => empty_nil(skip_get(5)),
-                              :else      => skip_get(6))
+                              :statement => skip_get(4).blintz_collect)
+      when :elsif_list
+        return child_nodes.map {|n| skip_get(n).blintz_collect}
+      when :else
+        return self_type_node(:statement => skip_get(1).blintz_collect)
+      when :return
+        return self_type_node(:value => skip_get(1).blintz_collect)
       when :null_statement
         return self_type_node
       when :expr
-        return self_type_node #todo, obviously
+        if child_nodes.size == 1
+          return self_type_node(:value => skip_get(0).blintz_collect)
+        elsif child_nodes.size == 2
+          return self_type_node(:value => skip_get(1).blintz_collect)
+        elsif child_nodes.size == 3
+          return self_type_node(:lhs => skip_get(0).blintz_collect,
+                                :rhs => skip_get(2).blintz_collect)
+        end
+      else
+        return self
       end
-      puts "what?"
-      exit 1
     end
   end
 end

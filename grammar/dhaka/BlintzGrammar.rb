@@ -50,7 +50,7 @@ class BlintzGrammar < Dhaka::Grammar
   
   for_symbol('globals_list') do
     single_declaration      %w| global_declaration |
-    multiple_declaration    %w| globals_list global_declaration | 
+    multiple_declaration    %w| globals_list global_declaration | do tag!(:declaration_list); end
   end
 
   for_symbol('global_declaration') do
@@ -140,7 +140,8 @@ class BlintzGrammar < Dhaka::Grammar
 #		log_or				%w( Expr || Expr )
 #		bit_and				%w| Expr & Expr |
 #		bit_or				%w( Expr | Expr )
-		literal				%w| NUMBER_LITERAL |                do tag!(:expr, :numeric_literal) end
+		literal				%w| DECIMAL_LITERAL |               do tag!(:expr, :decimal_literal) end
+		hex_literal		%w| HEX_LITERAL |                   do tag!(:expr, :hex_literal) end
 		name					%w| NAME_LITERAL |                  do tag!(:expr, :name) end
 		array_name    %w| @ NAME_LITERAL |                do tag!(:expr, :array_name) end
 #		ref						%w| & WORD_LITERAL |

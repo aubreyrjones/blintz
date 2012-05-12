@@ -24,8 +24,13 @@ class BlintzLexerSpec < Dhaka::LexerSpecification
     create_token 'TYPE_LITERAL'
   end
   
+  
+  for_pattern('0x[0-9a-fA-F]+') do
+      create_token('HEX_LITERAL')
+  end
+  
   for_pattern('\d*(\.\d+)?') do
-      create_token('NUMBER_LITERAL')
+      create_token('DECIMAL_LITERAL')
   end
   
   for_pattern('\s+') do
