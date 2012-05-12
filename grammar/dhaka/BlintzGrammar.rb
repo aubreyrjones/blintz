@@ -1,55 +1,11 @@
 require 'dhaka'
+require_relative 'ast/blintz_ast.rb'
 
-def recursive_statement_add(list, mil_node, production_name)
-  prod_name = mil_node.production.to_s
-  
-  if prod_name =~ production_name
-    if mil_node.child_nodes[0].production.to_s =~ production_name
-      recursive_statement_add(list, mil_node.child_nodes[0], production_name)
-    else
-      list << mil_node.child_nodes[0]
-    end
-    
-    if mil_node.child_nodes.size > 1
-      list << mil_node.child_nodes[1]
-    end
-  end
-end
-
-
-module BlintzParseNodeMixin
-  def bt(*blintz_tags)
-    if @bt.nil?
-      @bt = []
-    end
-    
-    @bt.concat(blintz_tags)
-    self
-  end
-  
-  def tag
-    if @bt.nil? || @bt.empty?
-      return :skip
-    end
-    @bt[0]
-  end
-  
-  def tags
-    @bt
-  end
-  
-  def tag_str
-    if @bt.nil? || @bt.empty?
-      return nil
-    end
-    
-    '{' + @bt.join(', ') + '}'
-  end
-end
+ParseTreeMixin = BlintzAst::BlintzParseNodeMixin
 
 class Dhaka::ParseTreeCompositeNode
-  include BlintzParseNodeMixin
-
+  include ParseTreeMixin
+  include BlintzAst::NodeType
   
   def to_dot(graph)
     graph.node(self, :label => tag_str || production.to_s + "{#{tag}}")
@@ -62,13 +18,14 @@ class Dhaka::ParseTreeCompositeNode
 end
 
 class Dhaka::ParseTreeLeafNode
-  include BlintzParseNodeMixin
+  include BlintzAst::LeafNodeMixin
+  include BlintzAst::NodeType
 end
 
 class BlintzGrammar < Dhaka::Grammar
 
   for_symbol(Dhaka::START_SYMBOL_NAME) do
-    blintz_module           %w| module_statements |
+    blintz_module           %w| module_statements |               do tag!(:module); end
   end
   
   for_symbol('module_statements') do
@@ -76,8 +33,7 @@ class BlintzGrammar < Dhaka::Grammar
     
     declaration_list       %w| globals_list |                     do
       
-      retval = nil
-      if child_nodes[0].production.to_s =~ /^global_declaration/
+      if child_nodes[0].production.to_s =~ /global_declaration/
         k = child_nodes[0]
         child_nodes.clear << k
       else
@@ -86,31 +42,31 @@ class BlintzGrammar < Dhaka::Grammar
         child_nodes.clear
         child_nodes.concat(new_kids)
       end
-      bt(:declarations)
+      tag!(:declarations)
     end
     
   end
 
   
   for_symbol('globals_list') do
-    single_declaration      %w| global_declaration |              do child_nodes[0]; end
+    single_declaration      %w| global_declaration |
     multiple_declaration    %w| globals_list global_declaration | 
   end
 
   for_symbol('global_declaration') do
-    import                %w| import string_literal ; |           do bt(:import); end
+    import                %w| import string_literal ; |           do tag!(:import); end
     global_function_def   %w| function_def |                      do child_nodes[0]; end
   end
   
   for_symbol('function_def') do
-    f_def                 %w| def NAME_LITERAL statement |       do bt(:def); end
+    f_def                 %w| def NAME_LITERAL statement |       do tag!(:def); end
   end
   
   for_symbol('statement') do
-    null_statement      %w| { } |
+    null_statement      %w| { } |                                do tag!(:null_statement); end
     
     
-    simple_statement    %w| primary_statement |                  do bt(:simple_statement) end
+    simple_statement    %w| primary_statement |                  do tag!(:skip) end
     
     compound_statement  %w| { statement_list } |                 do
 
@@ -124,7 +80,7 @@ class BlintzGrammar < Dhaka::Grammar
         child_nodes.clear
         child_nodes.concat(new_kids)      
       end
-      bt(:compound_statement)
+      tag!(:compound_statement)
     end
   end
 
@@ -136,34 +92,34 @@ class BlintzGrammar < Dhaka::Grammar
 
   
   for_symbol('primary_statement') do
-    if_statement       %w| if ( expr ) statement elsif_list else_clause |     do bt(:if); end
+    if_statement       %w| if ( expr ) statement elsif_list else_clause |     do tag!(:if); end
     
-    assign_statement   %w| expr = expr ; |              do bt(:assign); end
-    return_statement   %w| return expr ; |              do bt(:return); end
+    assign_statement   %w| expr = expr ; |              do tag!(:assign); end
+    return_statement   %w| return expr ; |              do tag!(:return); end
     var_decl           %w| var var_declaration ; |      do child_nodes[1]; end
   end
   
   for_symbol('elsif_list') do
     single_elsif       %w| elsif_clause |            do child_nodes[0]; end
-    multiple_elsif     %w| elsif_list elsif_clause | do recursive_statement_add(k = [], self, /multiple_elsif elsif_list/); child_nodes.clear.concat(k); bt(:elsif_list); end
+    multiple_elsif     %w| elsif_list elsif_clause | do recursive_statement_add(k = [], self, /multiple_elsif elsif_list/); child_nodes.clear.concat(k); tag!(:elsif_list); end
     no_elsif           %w| |
   end
 
   
   for_symbol('elsif_clause') do
-    elsif_expr_statement     %w| elsif ( expr ) statement |   do bt(:elsif) end
+    elsif_expr_statement     %w| elsif ( expr ) statement |   do tag!(:elsif) end
   end
 
 
   for_symbol('else_clause') do
     no_else            %w| |
-    else_present       %w| else statement |          do bt(:else) end
+    else_present       %w| else statement |          do tag!(:else) end
   end
   
   
   for_symbol('var_declaration') do
-    simple_spec        %w| NAME_LITERAL |            do bt(:var, :simple) end
-    array_spec         %w| expr @ NAME_LITERAL |     do bt(:var, :array) end
+    simple_spec        %w| NAME_LITERAL |            do tag!(:var, :simple) end
+    array_spec         %w| expr @ NAME_LITERAL |     do tag!(:var, :array) end
   end
   
 	precedences do
@@ -176,19 +132,19 @@ class BlintzGrammar < Dhaka::Grammar
 
 	for_symbol('expr') do
 #    log_not       %w| ! Expr |
-		mult					%w| expr * expr |                   do bt(:expr, :mult) end
-		div						%w| expr / expr |                   do bt(:expr, :div) end
-		sub						%w| expr - expr |                   do bt(:expr, :sub) end
-		add						%w| expr + expr |                   do bt(:expr, :add) end
+		mult					%w| expr * expr |                   do tag!(:expr, :mult) end
+		div						%w| expr / expr |                   do tag!(:expr, :div) end
+		sub						%w| expr - expr |                   do tag!(:expr, :sub) end
+		add						%w| expr + expr |                   do tag!(:expr, :add) end
 #		log_and				%w| Expr && Expr |
 #		log_or				%w( Expr || Expr )
 #		bit_and				%w| Expr & Expr |
 #		bit_or				%w( Expr | Expr )
-		literal				%w| NUMBER_LITERAL |                do bt(:expr, :numeric_literal) end
-		name					%w| NAME_LITERAL |                  do bt(:expr, :name) end
-		array_name    %w| @ NAME_LITERAL |                do bt(:expr, :array_name) end
+		literal				%w| NUMBER_LITERAL |                do tag!(:expr, :numeric_literal) end
+		name					%w| NAME_LITERAL |                  do tag!(:expr, :name) end
+		array_name    %w| @ NAME_LITERAL |                do tag!(:expr, :array_name) end
 #		ref						%w| & WORD_LITERAL |
-		paren					%w| ( expr ) |                      do bt(:expr, :paren) end
+		paren					%w| ( expr ) |                      do tag!(:expr, :paren) end
 #		deref					%w| [ Expr ] |
 #    negate        %w| - Expr |, :prec => '*'
 	end

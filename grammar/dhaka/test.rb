@@ -17,28 +17,41 @@ require './BlintzLexerSpec'
 require './blintz_parser'
 lexer = Dhaka::Lexer.new(BlintzLexerSpec)
 File.open('blintz_lexer.rb', 'w') {|file| file << lexer.compile_to_ruby_source_as(:BlintzLexer)}
-  
 require './blintz_lexer.rb'
-lex_result = BlintzLexer.lex("
+
+BIG_TEST = "
   def test {
-    var test_var;
-    var 12 @test_array;
+    if (a) return b;
     
     if (test_var) {
-      test_var = 2*2/3+2;
     }
     elsif (test_var2) return 3;
     else {
-      x = y;
     }
     @test_array = test_var;
   }
   
   def test2 {
-    var test_var;
+    if (test_var) {
+      test_var = 2*2/3+2;
+    }
+    elsif (test_var2) return 3;
+    elsif (test_var2) return 3;
+    elsif (test_var2) return 3;
+    else {
+      x = y;
+    }
   }
   
-  ")
+  "
+
+lex_result = BlintzLexer.lex("
+  
+  def test {
+    a = b;
+  }
+
+")
 
 parse_result = BlintzParser.parse(lex_result)
 if parse_result.is_a? Dhaka::TokenizerErrorResult
@@ -51,12 +64,19 @@ if parse_result.is_a? Dhaka::ParseErrorResult
   exit 1
 end
 
-pp parse_result.parse_tree
+blintz_result = parse_result.parse_tree.blintz_collect
+
+#pp blintz_result
 
 File.open('parse_tree.dot', 'w') do |file|
   file << parse_result.to_dot
 end
 
+File.open('ast.dot', 'w') do |file|
+  file << BlintzAst::to_dot(blintz_result)
+end
+
 system('dot -Tjpg parse_tree.dot > tree.jpg')
+system('dot -Tjpg ast.dot > ast.jpg')
 
 $result = parse_result
