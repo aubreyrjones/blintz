@@ -1,0 +1,23 @@
+def test_function {
+    var a;
+    var 1 @b;
+    
+    a = 1;
+    
+    if (a) {
+	@b[0] = 1;
+    }
+    elsif (-a){
+	@b[1] = 3;
+    }
+    else
+	@b[0] = 2;
+	
+    a = 10;
+    
+    while (a){
+	
+    } next {
+	a = a - 1;
+    }
+}

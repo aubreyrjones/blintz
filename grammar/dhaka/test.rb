@@ -1,23 +1,18 @@
-class String
-  def collect(&block)
-    return each_char.collect &block
-  end
-end
-
+#class String
+#  def collect(&block)
+#    return each_char.collect &block
+#  end
+#end
 require 'dhaka'
-require './BlintzGrammar'
+require_relative '../../lib/blintz/ast/blintz_ast'
 require 'pp'
-parser = Dhaka::Parser.new(BlintzGrammar)
-File.open('blintz_parser.rb', 'w') {|file| file << parser.compile_to_ruby_source_as(:BlintzParser)}
-File.open('blintz_parser.dot', 'w') {|file| file << parser.to_dot}
 
-#system('dot -Tjpg blintz_parser.dot > parser_graph.jpg')
+system('ruby build_grammar.rb')
 
+require './BlintzGrammar'
 require './BlintzLexerSpec'
 require './blintz_parser'
-lexer = Dhaka::Lexer.new(BlintzLexerSpec)
-File.open('blintz_lexer.rb', 'w') {|file| file << lexer.compile_to_ruby_source_as(:BlintzLexer)}
-require './blintz_lexer.rb'
+require './blintz_lexer'
 
 BIG_TEST = "
   import \"testing\";
@@ -27,8 +22,10 @@ BIG_TEST = "
     if (a) return 6;
     
     if (test_var) {
+      test_var = 2 * 22 + (2 + 3) / 210;
     }
     elsif (test_var2) return 3;
+    elsif (test_var3) return 8;
     else {
     }
     @test_array = test_var;
@@ -37,9 +34,17 @@ BIG_TEST = "
   def test2 {
     while (a) {
       x = y;
-      next;
+      if (x)
+        next;
+       
     }
     next x = x + 1;
+    
+    x = x | y;
+    z = z || z;
+    y = x && b;
+    z = [4 + 3];
+    a = #testing;
   }
   
   "

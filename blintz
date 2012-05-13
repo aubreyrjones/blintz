@@ -1,0 +1,32 @@
+require 'trollop'
+
+require_relative './lib/blintz/blintz_parse'
+
+USAGE = <<-EOS
+
+Basic Use: blintz file1.ntz [file2.ntz file3.ntz]
+EOS
+
+$config = Trollop::options do
+  banner USAGE + "\nOPTIONS:"
+  opt :graph, "Output parse and syntax trees for modules into the given directory.", :type => :string
+  opt :input_files, "A path to a list of modules to compile. One entry per line.", :type => :string
+end
+
+input_files = []
+input_files.concat(ARGV)
+
+if $config[:input_files]
+  open($config[:input_files], 'r') do |file|
+    input_files.concat(file.readlines)
+  end
+end
+
+parsers = input_files.map {|source| Blintz::Parser.new(source)}
+
+parsers.map {|p| p.parse}
+
+if $config[:graph]
+    parsers.map {|p| p.graph_both($config[:graph])}
+end
+

@@ -1,20 +1,3 @@
-
-def recursive_statement_add(list, mil_node, production_name)
-  prod_name = mil_node.production.to_s
-  
-  if prod_name =~ production_name
-    if mil_node.child_nodes[0].production.to_s =~ production_name
-      recursive_statement_add(list, mil_node.child_nodes[0], production_name)
-    else
-      list << mil_node.child_nodes[0]
-    end
-    
-    if mil_node.child_nodes.size > 1
-      list << mil_node.child_nodes[1]
-    end
-  end
-end
-
 module BlintzAst
   module Dot #:nodoc:
     class Digraph #:nodoc:
@@ -106,7 +89,8 @@ module BlintzAst
     end
     
     def to_dot(graph)
-      graph.node(self, :label => "[#{tags.join(', ')}]", :color => 'gold')
+      color = tagged?(:leaf) ? 'red' : 'gold'
+      graph.node(self, :label => "[#{tags.join(', ')}]", :color => color)
       attributes.entries.each do |k, v|
         if v.is_a? Array
           v.each do |s|
@@ -237,6 +221,9 @@ module BlintzAst
       when :else
         return self_type_node(:statement => skip_get(1).blintz_collect)
       when :return
+        # return without value
+        return self_type_node if tagged? :simple
+        # return with value
         return self_type_node(:value => skip_get(1).blintz_collect)
       when :null_statement
         return self_type_node
@@ -247,6 +234,14 @@ module BlintzAst
       when :next
         return self_type_node()
       when :expr
+        # outfix operations
+        if tagged? :paren
+          return skip_get(1).blintz_collect
+        elsif tagged? :deref
+          return self_type_node(:value => skip_get(1).blintz_collect)
+        end
+        
+        # literal, unary, or infix
         if child_nodes.size == 1
           return self_type_node(:value => skip_get(0).blintz_collect)
         elsif child_nodes.size == 2
@@ -267,4 +262,24 @@ module BlintzAst
       end
     end
   end
+end
+
+
+class Dhaka::ParseTreeCompositeNode
+  include BlintzAst::BlintzParseNodeMixin
+  include BlintzAst::NodeType
+  
+  def to_dot(graph)
+    graph.node(self, :label => tag_str || production.to_s + "{#{tag}}", :color => 'red')
+    child_nodes.each do |child|
+      graph.edge(self, child)
+      child.to_dot(graph)
+    end
+  end
+  
+end
+
+class Dhaka::ParseTreeLeafNode
+  include BlintzAst::LeafNodeMixin
+  include BlintzAst::NodeType
 end
