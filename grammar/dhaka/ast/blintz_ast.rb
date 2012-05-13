@@ -96,11 +96,11 @@ module BlintzAst
     
     def rec_graph(graph, obj, edge_label)
       if obj.respond_to? :to_dot
-        graph.edge(self, obj, :label => edge_label, :color => 'black')
+        graph.edge(self, obj, :label => edge_label, :color => 'black', :fontsize => 8)
         obj.to_dot(graph)
       else
         s = obj.to_s
-        graph.edge(self, s, :label => edge_label, :color => 'gray')
+        graph.edge(self, s, :label => edge_label, :color => 'gray', :fontsize => 8)
         graph.node(s, :label => s, :color => 'blue')
       end
     end
@@ -132,6 +132,8 @@ module BlintzAst
       when 'HEX_LITERAL'
         # return Node.new([:literal, :numeric], :value => self.token.value[2..-1].to_i(16))
         return self.token.value[2..-1].to_i(16)
+      when 'STRING_LITERAL'
+        return self.token.value[1..-2] 
       end
       
       return Node.new(:leaf, :token => self.to_s)
@@ -207,8 +209,6 @@ module BlintzAst
       when :module
         return self_type_node(:declarations => skip_get(0).blintz_collect)
       when :declarations
-        return skip_get(0).blintz_collect
-      when :declaration_list
         return child_nodes.map {|n| skip_get(n).blintz_collect }
       when :def
         return self_type_node(:name => skip_get(1).blintz_collect,
@@ -218,6 +218,8 @@ module BlintzAst
       when :assign
         return self_type_node(:dest => skip_get(0).blintz_collect,
                               :source => skip_get(2).blintz_collect)
+      when :import
+        return self_type_node(:dep_mod => skip_get(1).blintz_collect)
       when :if
         a = {
             :condition => skip_get(2).blintz_collect,
@@ -238,6 +240,10 @@ module BlintzAst
         return self_type_node(:value => skip_get(1).blintz_collect)
       when :null_statement
         return self_type_node
+      when :while
+        return self_type_node(:expr => skip_get(2).blintz_collect,
+                              :statement => skip_get(4).blintz_collect,
+                              :next => skip_get(5).blintz_collect)
       when :expr
         if child_nodes.size == 1
           return self_type_node(:value => skip_get(0).blintz_collect)

@@ -2,7 +2,7 @@ class BlintzLexerSpec < Dhaka::LexerSpecification
 
   id_remainder = '[a-zA-Z0-9_?]+'
 
-  keywords = %w| return def if elsif else var import | #  struct  
+  keywords = %w| return def if elsif else var import while next | #  struct  
 
   %w| @ ( ) { } = - ! > < , + *   ; / ^ |.each do |char|
     for_symbol(char) do
@@ -19,7 +19,7 @@ class BlintzLexerSpec < Dhaka::LexerSpecification
   for_pattern('"([^"\\\\]*(\\\\.[^"\\\\]*)*)"') do
     create_token 'STRING_LITERAL'
   end
-    
+  
   for_pattern("[a-z_]+(#{id_remainder})?") do
     create_token 'NAME_LITERAL'
   end
@@ -27,7 +27,6 @@ class BlintzLexerSpec < Dhaka::LexerSpecification
   for_pattern("[A-Z]+(#{id_remainder})?") do
     create_token 'TYPE_LITERAL'
   end
-  
   
   for_pattern('0x[0-9a-fA-F]+') do
       create_token('HEX_LITERAL')

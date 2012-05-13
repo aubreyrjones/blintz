@@ -35,15 +35,10 @@ BIG_TEST = "
   }
   
   def test2 {
-    if (test_var) {
-      test_var = 2+2/3+2;
-    }
-    elsif (test_var2) return 3;
-    elsif (test_var2) return 3;
-    elsif (test_var2) return 3;
-    else {
+    while (a) {
       x = y;
     }
+    next x = x + 1;
   }
   
   "

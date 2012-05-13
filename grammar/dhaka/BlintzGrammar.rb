@@ -8,7 +8,7 @@ class Dhaka::ParseTreeCompositeNode
   include BlintzAst::NodeType
   
   def to_dot(graph)
-    graph.node(self, :label => tag_str || production.to_s + "{#{tag}}")
+    graph.node(self, :label => tag_str || production.to_s + "{#{tag}}", :color => 'red')
     child_nodes.each do |child|
       graph.edge(self, child)
       child.to_dot(graph)
@@ -31,19 +31,7 @@ class BlintzGrammar < Dhaka::Grammar
   for_symbol('module_statements') do
     no_declarations         %w| |
     
-    declaration_list       %w| globals_list |                     do
-      
-      if child_nodes[0].production.to_s =~ /global_declaration/
-        k = child_nodes[0]
-        child_nodes.clear << k
-      else
-        new_kids = []
-        recursive_statement_add(new_kids, child_nodes[0], /^multiple_declaration/)
-        child_nodes.clear
-        child_nodes.concat(new_kids)
-      end
-      tag!(:declarations)
-    end
+    declaration_list       %w| globals_list |                     do rec_list_compact(child_nodes[0], /^multiple_declaration/).tag!(:declarations); end
     
   end
 
@@ -68,20 +56,7 @@ class BlintzGrammar < Dhaka::Grammar
     
     simple_statement    %w| primary_statement |                  do tag!(:skip) end
     
-    compound_statement  %w| { statement_list } |                 do
-
-      if child_nodes[1].production.to_s =~ /simple_statement statement/
-        kid = child_nodes[1]
-        child_nodes.clear
-        child_nodes << kid
-      else
-        new_kids = []
-        recursive_statement_add(new_kids, child_nodes[1], /multiple_items statement_list/)
-        child_nodes.clear
-        child_nodes.concat(new_kids)      
-      end
-      tag!(:compound_statement)
-    end
+    compound_statement  %w| { statement_list } |                 do rec_list_compact(child_nodes[1], /multiple_items statement_list/).tag!(:compound_statement); end
   end
 
   
@@ -93,7 +68,7 @@ class BlintzGrammar < Dhaka::Grammar
   
   for_symbol('primary_statement') do
     if_statement       %w| if ( expr ) statement elsif_list else_clause |     do tag!(:if); end
-    
+    while_statement    %w| while ( expr ) statement next_clause |              do tag!(:while); end
     assign_statement   %w| expr = expr ; |              do tag!(:assign); end
     return_statement   %w| return expr ; |              do tag!(:return); end
     var_decl           %w| var var_declaration ; |      do child_nodes[1]; end
@@ -104,18 +79,22 @@ class BlintzGrammar < Dhaka::Grammar
     multiple_elsif     %w| elsif_list elsif_clause | do recursive_statement_add(k = [], self, /multiple_elsif elsif_list/); child_nodes.clear.concat(k); tag!(:elsif_list); end
     no_elsif           %w| |
   end
-
   
   for_symbol('elsif_clause') do
     elsif_expr_statement     %w| elsif ( expr ) statement |   do tag!(:elsif) end
   end
 
-
   for_symbol('else_clause') do
     no_else            %w| |
     else_present       %w| else statement |          do tag!(:else) end
   end
-  
+
+
+  for_symbol('next_clause') do
+    absent             %w| |
+    next_present       %w| next statement |          do skip_get(1); end
+  end  
+    
   
   for_symbol('var_declaration') do
     simple_spec        %w| NAME_LITERAL |            do tag!(:var, :simple) end
