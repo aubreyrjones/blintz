@@ -243,7 +243,9 @@ module BlintzAst
       when :while
         return self_type_node(:expr => skip_get(2).blintz_collect,
                               :statement => skip_get(4).blintz_collect,
-                              :next => skip_get(5).blintz_collect)
+                              :next => skip_get(5) ? skip_get(5).blintz_collect : nil)
+      when :next
+        return self_type_node()
       when :expr
         if child_nodes.size == 1
           return self_type_node(:value => skip_get(0).blintz_collect)

@@ -69,6 +69,7 @@ class BlintzGrammar < Dhaka::Grammar
   for_symbol('primary_statement') do
     if_statement       %w| if ( expr ) statement elsif_list else_clause |     do tag!(:if); end
     while_statement    %w| while ( expr ) statement next_clause |              do tag!(:while); end
+    next_statement     %w| next ; |                     do tag!(:next); end
     assign_statement   %w| expr = expr ; |              do tag!(:assign); end
     return_statement   %w| return expr ; |              do tag!(:return); end
     var_decl           %w| var var_declaration ; |      do child_nodes[1]; end

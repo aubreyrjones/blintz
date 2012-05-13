@@ -37,6 +37,7 @@ BIG_TEST = "
   def test2 {
     while (a) {
       x = y;
+      next;
     }
     next x = x + 1;
   }
