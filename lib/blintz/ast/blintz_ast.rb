@@ -96,10 +96,9 @@ module BlintzAst
           v.each do |s|
             rec_graph(graph, s, k.to_s)
           end
-          return
+        else
+          rec_graph(graph, v, k.to_s)
         end
-        
-        rec_graph(graph, v, k.to_s)
       end
     end
   end
@@ -125,6 +124,10 @@ module BlintzAst
   end
   
   module BlintzParseNodeMixin
+ 
+    def ellide
+      child_nodes[0]
+    end
  
     def skip_get(node)
       if node.is_a? Fixnum
@@ -195,8 +198,15 @@ module BlintzAst
       when :declarations
         return child_nodes.map {|n| skip_get(n).blintz_collect }
       when :def
-        return self_type_node(:name => skip_get(1).blintz_collect,
-                              :statement => skip_get(2).blintz_collect)
+        return self_type_node(:name => skip_get(1).blintz_collect(),
+                              :params => skip_get(3).blintz_collect(),
+                              :statement => skip_get(5).blintz_collect())
+      when :formal_params
+        return child_nodes.map {|n| skip_get(n).blintz_collect}
+      when :param
+        if tagged? :simple
+          return self_type_node(:name => skip_get(0).blintz_collect)
+        end
       when :compound_statement
         return self_type_node(:subs => child_nodes.map {|n| skip_get(n).blintz_collect})
       when :assign
@@ -208,8 +218,8 @@ module BlintzAst
         a = {
             :condition => skip_get(2).blintz_collect,
             :statement => skip_get(4).blintz_collect,
-            :else      => skip_get(6) ? skip_get(6).blintz_collect : nil,
-            :elsif     => skip_get(5) ? skip_get(5).blintz_collect : nil
+            :elsif     => skip_get(5) ? skip_get(5).blintz_collect : nil,
+            :else      => skip_get(6) ? skip_get(6).blintz_collect : nil
             }
           
         return self_type_node(a)
@@ -239,6 +249,9 @@ module BlintzAst
           return skip_get(1).blintz_collect
         elsif tagged? :deref
           return self_type_node(:value => skip_get(1).blintz_collect)
+        elsif tagged? :array_index
+          return self_type_node(:name => skip_get(1).blintz_collect,
+                                :index => skip_get(3).blintz_collect)
         end
         
         # literal, unary, or infix

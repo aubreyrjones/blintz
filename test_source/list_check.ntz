@@ -1,0 +1,10 @@
+def four_test(w, x, y, z) {
+    a = b;
+    c = d;
+    e = f;
+    g = h;
+}
+
+def one_test(a) {
+    a = b;
+}

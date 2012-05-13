@@ -19,11 +19,28 @@ class BlintzGrammar < Dhaka::Grammar
 
   for_symbol('global_declaration') do
     import                  %w| import STRING_LITERAL ; |        do tag!(:import); end
-    global_function_def     %w| function_def |                   do child_nodes[0]; end
+    global_function_def     %w| function_def |                   do ellide; end
   end
   
   for_symbol('function_def') do
-    f_def                   %w| def NAME_LITERAL statement |     do tag!(:def); end
+    f_def                   %w| def NAME_LITERAL ( formal_params ) statement |     do tag!(:def); end
+  end
+  
+  for_symbol('formal_params') do
+    no_formals              %w| |
+    formals_declared        %w| formals_list |                   do rec_list_compact(child_nodes[0], /formals_list/).
+                                                                    tag!(:formal_params) end
+  end
+  
+  for_symbol('formals_list') do
+    formal_item             %w| formal_param |                   do ellide; end
+    formals_list_cont       %w| formals_list , formal_param |    do child_nodes.delete_at 1; self; end
+  end
+  
+  for_symbol('formal_param') do
+    simple_param            %w| NAME_LITERAL |                   do tag!(:param, :simple) end
+    array_param             %w| @ NAME_LITERAL |                 do tag!(:param, :array) end
+    struct_param            %w| @ NAME_LITERAL as TYPE_LITERAL | do tag!(:param, :struct) end
   end
   
   for_symbol('statement') do
@@ -38,7 +55,7 @@ class BlintzGrammar < Dhaka::Grammar
 
   
   for_symbol('statement_list') do
-    statement_item          %w| statement |                      do child_nodes[0]; end
+    statement_item          %w| statement |                      do ellide; end
     multiple_items          %w| statement_list statement|
   end
 
@@ -54,7 +71,7 @@ class BlintzGrammar < Dhaka::Grammar
   end
   
   for_symbol('elsif_list') do
-    single_elsif            %w| elsif_clause |                   do child_nodes[0]; end
+    single_elsif            %w| elsif_clause |                   do ellide; end
     multiple_elsif          %w| elsif_list elsif_clause |        do rec_list_compact(child_nodes[0], /multiple_elsif elsif_list/).
                                                                     tag!(:elsif_list); end
     no_elsif                %w| |
@@ -107,6 +124,7 @@ class BlintzGrammar < Dhaka::Grammar
     paren                   %w| ( expr ) |                       do tag!(:expr, :paren) end
     deref                   %w| [ expr ] |                       do tag!(:expr, :deref) end
     array_index             %w| @ NAME_LITERAL [ expr ] |        do tag!(:expr, :array_index) end
+    function_call           %w| NAME_LITERAL ( ) |               do tag!(:expr, :func_call) end
     negate                  %w| - expr |, :prec => '*'           do tag!(:expr, :negate) end
   end
 end

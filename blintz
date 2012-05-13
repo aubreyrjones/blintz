@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 require 'trollop'
 
 require_relative './lib/blintz/blintz_parse'
@@ -20,6 +21,12 @@ if $config[:input_files]
   open($config[:input_files], 'r') do |file|
     input_files.concat(file.readlines)
   end
+end
+
+if input_files.size == 0
+  puts "No input files."
+  puts USAGE
+  exit 1
 end
 
 parsers = input_files.map {|source| Blintz::Parser.new(source)}

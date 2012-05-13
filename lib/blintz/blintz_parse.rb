@@ -1,3 +1,4 @@
+require 'dhaka'
 require_relative 'ast/blintz_ast'
 require_relative 'ast/BlintzGrammar'
 require_relative 'ast/BlintzLexerSpec'
@@ -10,26 +11,26 @@ module Blintz
     
     def initialize(filename)
       @filename = filename
-      @module_name = File.basename(filename)
+      @module_name = File.basename(filename)[0..-5]
     end
     
     def parse
-      lex_result = nil
-      
-      # lex the file
-      File.open(@filename, 'r') do |f|
-        lex_result = BlintzLexer.lex(f)
+      source = nil
+      File.open(@filename, 'rb') do |f|
+        source = f.read
       end
       
+      # lex the file
+      lex_result = BlintzLexer.lex(source)
       # parse the file, maybe getting an error
       parse_result = BlintzParser.parse(lex_result)
       if parse_result.is_a? Dhaka::TokenizerErrorResult
-        puts parse_result
+        puts parse_result.inspect
         exit 1
       end
 
       if parse_result.is_a? Dhaka::ParseErrorResult
-        puts parse_result
+        puts parse_result.inspect
         exit 1
       end
       
@@ -40,13 +41,13 @@ module Blintz
     def write_dottable(dottable, suffix, dir)
       base_file_name = module_name + ".#{suffix}" + ".dot"
       
-      file = File.join(dir, filename)
+      file = File.join(dir, base_file_name)
       
       File.open(file, 'w') do |f|
         f << BlintzAst::to_dot(dottable)
       end
       
-      system("dot -Tjpg #{file} > #{file}.jpg")
+      system("dot -Tjpg #{file} > #{file[0..-5]}.jpg")
 
     end
 
