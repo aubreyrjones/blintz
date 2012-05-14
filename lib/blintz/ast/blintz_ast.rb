@@ -125,8 +125,16 @@ module BlintzAst
   
   module BlintzParseNodeMixin
  
+    def kill(k=[])
+      k.sort!.reverse
+      k.each do |i|
+        child_nodes.delete_at i
+      end
+      self
+    end
+ 
     def ellide
-      child_nodes[0]
+      return child_nodes[0]
     end
  
     def skip_get(node)
@@ -206,12 +214,24 @@ module BlintzAst
       when :param
         if tagged? :simple
           return self_type_node(:name => skip_get(0).blintz_collect)
+        elsif tagged? :array
+          return self_type_node(:name => skip_get(1).blintz_collect)
         end
       when :compound_statement
         return self_type_node(:subs => child_nodes.map {|n| skip_get(n).blintz_collect})
       when :assign
-        return self_type_node(:dest => skip_get(0).blintz_collect,
-                              :source => skip_get(2).blintz_collect)
+        if (tagged? :set) || (tagged? :ref_set)
+          return self_type_node(:dest => skip_get(0).blintz_collect,
+                                :value => skip_get(2).blintz_collect)
+        elsif tagged? :index
+          return self_type_node(:name => skip_get(1).blintz_collect,
+                                :index_expr => skip_get(3).blintz_collect,
+                                :value => skip_get(3).blintz_collect)
+        elsif tagged? :deref
+          return self_type_node(:address => skip_get(1).blintz_collect,
+                                :value => skip_get(4).blintz_collect)
+        end
+        
       when :import
         return self_type_node(:dep_mod => skip_get(1).blintz_collect)
       when :if
@@ -238,7 +258,7 @@ module BlintzAst
       when :null_statement
         return self_type_node
       when :while
-        return self_type_node(:expr => skip_get(2).blintz_collect,
+        return self_type_node(:condition => skip_get(2).blintz_collect,
                               :statement => skip_get(4).blintz_collect,
                               :next => skip_get(5) ? skip_get(5).blintz_collect : nil)
       when :next

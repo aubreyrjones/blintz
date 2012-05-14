@@ -64,10 +64,17 @@ class BlintzGrammar < Dhaka::Grammar
     if_statement            %w| if ( expr ) statement elsif_list else_clause |   do tag!(:if); end
     while_statement         %w| while ( expr ) statement next_clause |   do tag!(:while); end
     next_statement          %w| next ; |                         do tag!(:next); end
-    assign_statement        %w| expr = expr ; |                  do tag!(:assign); end
+    assign_statement        %w| assignment_indirect_p ; |        do ellide end
     simple_return_statement %w| return ; |                       do tag!(:return, :simple); end
     return_statement        %w| return expr ; |                  do tag!(:return, :valued); end
     var_decl                %w| var var_declaration ; |          do child_nodes[1]; end
+  end
+  
+  for_symbol('assignment_indirect_p') do
+    copy_set                %w| NAME_LITERAL = expr |    do tag!(:assign, :set); end
+    ref_set                 %w| @ NAME_LITERAL = expr |  do tag!(:assign, :ref_set) end
+    index_assign            %w| @ NAME_LITERAL [ index_expr ] = expr | do tag!(:assign, :index) end
+    indirect_assign         %w| [ expr ] = expr |        do tag!(:assign, :deref) end
   end
   
   for_symbol('elsif_list') do
@@ -99,15 +106,24 @@ class BlintzGrammar < Dhaka::Grammar
   end
   
   precedences do
-#    nonassoc %w| == |
-#    nonassoc %w| < > |
+    nonassoc %w| EQUALS |
+    nonassoc %w| < > |
     left     %w| + - |
     left     %w| * / |
-#    nonassoc %w| ! |
+    right    %w| ! |
+  end
+  
+  for_symbol('index_expr') do
+    member_index            %w| : NAME_LITERAL |
+    member_function         %w| : NAME_LITERAL ( ) |
+    expr_index              %w| expr |
   end
 
   for_symbol('expr') do
 #    log_not       %w| ! Expr |
+    log_eq                  %w| expr EQUALS expr |               do tag!(:expr, :equals) end
+    less_than               %w| expr < expr |                    do tag!(:expr, :less_than) end
+    greater_than            %w| expr > expr |                    do tag!(:expr, :greater_than) end
     mult                    %w| expr * expr |                    do tag!(:expr, :mult) end
     div                     %w| expr / expr |                    do tag!(:expr, :div) end
     sub                     %w| expr - expr |                    do tag!(:expr, :sub) end
@@ -123,7 +139,7 @@ class BlintzGrammar < Dhaka::Grammar
     ref                     %w| # NAME_LITERAL |                 do tag!(:expr, :ref) end
     paren                   %w| ( expr ) |                       do tag!(:expr, :paren) end
     deref                   %w| [ expr ] |                       do tag!(:expr, :deref) end
-    array_index             %w| @ NAME_LITERAL [ expr ] |        do tag!(:expr, :array_index) end
+    array_index             %w| @ NAME_LITERAL [ index_expr ] |  do tag!(:expr, :array_index) end
     function_call           %w| NAME_LITERAL ( ) |               do tag!(:expr, :func_call) end
     negate                  %w| - expr |, :prec => '*'           do tag!(:expr, :negate) end
   end

@@ -20,7 +20,11 @@ class BlintzLexerSpec < Dhaka::LexerSpecification
     create_token('BIT_OR')
   end
   
-  %w| @ ( ) { } [ ] # = - ! > < , + *   ; / ^ |.each do |char|
+  for_pattern('==') do
+    create_token('EQUALS')
+  end
+  
+  %w| @ ( ) { } [ ] # = - ! > < , + * : ; / ^ |.each do |char|
     for_symbol(char) do
       create_token(char)
     end
