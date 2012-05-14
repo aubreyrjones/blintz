@@ -125,7 +125,7 @@ module BlintzAst
   
   module BlintzParseNodeMixin
  
-    def kill(k=[])
+    def kill(*k)
       k.sort!.reverse
       k.each do |i|
         child_nodes.delete_at i

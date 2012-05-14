@@ -34,7 +34,7 @@ class BlintzGrammar < Dhaka::Grammar
   
   for_symbol('formals_list') do
     formal_item             %w| formal_param |                   do ellide; end
-    formals_list_cont       %w| formals_list , formal_param |    do child_nodes.delete_at 1; self; end
+    formals_list_cont       %w| formals_list , formal_param |    do kill(1) end
   end
   
   for_symbol('formal_param') do
@@ -99,7 +99,7 @@ class BlintzGrammar < Dhaka::Grammar
 
 
   for_symbol('next_clause') do
-    absent                  %w| |
+    next_absent             %w| |
     next_present            %w| next statement |                 do skip_get(1); end
   end  
     

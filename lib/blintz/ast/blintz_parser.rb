@@ -275,7 +275,7 @@ class BlintzParser < Dhaka::CompiledParser
   at_state(35) {
     for_symbols("next_clause") { shift_to 36 }
     for_symbols("next") { shift_to 37 }
-    for_symbols("elsif", "else", "}", "{", "if", "while", "return", "var", "NAME_LITERAL", "@", "[", "_End_", "import", "def") { reduce_with "absent" }
+    for_symbols("elsif", "else", "}", "{", "if", "while", "return", "var", "NAME_LITERAL", "@", "[", "_End_", "import", "def") { reduce_with "next_absent" }
   }
 
   at_state(36) {

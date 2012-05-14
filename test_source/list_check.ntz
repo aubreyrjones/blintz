@@ -1,8 +1,26 @@
 def four_test(w, x, y, z) {
-    a = b;
+    [a] = b;
     c = d;
     e = f;
     g = h;
+    
+    if (a) {
+	w = w;
+    }
+    elsif (b) {
+	x = x;
+    }
+    elsif (c) {
+	y = y;
+    }
+    elsif (d) {
+	z = z;
+    }
+    elsif (e) {
+	blah = blah;
+    }
+    else
+	rho = rho - rho;
 }
 
 def one_test(a) {
