@@ -79,11 +79,11 @@ module BlintzAst
     
     def rec_graph(graph, obj, edge_label)
       if obj.respond_to? :to_dot
-        graph.edge(self, obj, :label => edge_label, :color => 'black', :fontsize => 8)
+        graph.edge(self, obj, :label => edge_label, :color => 'black', :fontsize => 10)
         obj.to_dot(graph)
       else
         s = obj.to_s
-        graph.edge(self, s, :label => edge_label, :color => 'gray', :fontsize => 8)
+        graph.edge(self, s, :label => edge_label, :color => 'blue', :fontsize => 8)
         graph.node(s, :label => s, :color => 'blue')
       end
     end
@@ -183,6 +183,15 @@ module BlintzAst
       else
         list << self
       end
+    end
+    
+    def rec_list_merge(root_node, prod_regex)
+      new_kids = []
+      root_node.recursive_list(new_kids, prod_regex)
+      new_kids.concat(child_nodes.reject {|n| n.production.to_s =~ prod_regex})
+      child_nodes.clear
+      child_nodes.concat(new_kids)
+      self
     end
     
     def rec_list_compact(root_node, prod_regex)

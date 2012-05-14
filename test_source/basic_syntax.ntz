@@ -10,6 +10,10 @@ def test_function (a, @b) {
     elsif (-a < 0){
 	@b[1] = 3;
     }
+    elsif (c) {
+	elsifthen = x;
+    }
+
     else
 	@b[0] = 2;
 	

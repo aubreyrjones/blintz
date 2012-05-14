@@ -2,7 +2,7 @@ class BlintzLexerSpec < Dhaka::LexerSpecification
 
   id_remainder = '[a-zA-Z0-9_?]+'
 
-  keywords = %w| return def if elsif else var as at import while next | #  struct  
+  keywords = %w| return def if else elsif var as at import while next | #  struct  
 
   for_pattern('&&') do
     create_token('LOG_AND')

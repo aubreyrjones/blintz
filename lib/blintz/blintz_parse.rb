@@ -35,7 +35,10 @@ module Blintz
       end
       
       @parse_tree = parse_result.parse_tree
-      @ast = parse_result.parse_tree.blintz_collect
+    end
+    
+    def extract_ast
+      @ast = parse_tree.blintz_collect
     end
     
     def write_dottable(dottable, suffix, dir)
@@ -56,6 +59,9 @@ module Blintz
     end
     
     def ast_graph(dir)
+      if ast.nil?
+        extract_ast
+      end
       write_dottable(ast, "ast", dir)
     end
     

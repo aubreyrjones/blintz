@@ -61,9 +61,9 @@ class BlintzGrammar < Dhaka::Grammar
 
   
   for_symbol('primary_statement') do
-    if_statement            %w| if ( expr ) statement elsif_list else_clause |   do tag!(:if); end
-    while_statement         %w| while ( expr ) statement next_clause |   do tag!(:while); end
     next_statement          %w| next ; |                         do tag!(:next); end
+    if_statement            %w| if ( expr ) statement elsif_list else_clause | do tag!(:if); end
+    while_statement         %w| while ( expr ) statement next_clause |   do tag!(:while); end
     assign_statement        %w| assignment_indirect_p ; |        do ellide end
     simple_return_statement %w| return ; |                       do tag!(:return, :simple); end
     return_statement        %w| return expr ; |                  do tag!(:return, :valued); end
@@ -78,10 +78,14 @@ class BlintzGrammar < Dhaka::Grammar
   end
   
   for_symbol('elsif_list') do
-    single_elsif            %w| elsif_clause |                   do ellide; end
-    multiple_elsif          %w| elsif_list elsif_clause |        do rec_list_compact(child_nodes[0], /multiple_elsif elsif_list/).
-                                                                    tag!(:elsif_list); end
     no_elsif                %w| |
+    elsif_present           %w| elsif_rec_list |                 do rec_list_compact(child_nodes[0], /multiple_elsif/).
+                                                                    tag!(:elsif_list) end
+  end
+  
+  for_symbol('elsif_rec_list') do
+    single_elsif            %w| elsif_clause |                   do ellide; end
+    multiple_elsif          %w| elsif_rec_list elsif_clause |
   end
   
   for_symbol('elsif_clause') do
@@ -89,7 +93,7 @@ class BlintzGrammar < Dhaka::Grammar
   end
 
   for_symbol('else_clause') do
-    no_else                 %w| |
+    else_absent             %w| |
     else_present            %w| else statement |                 do tag!(:else) end
   end
 
